@@ -175,7 +175,8 @@ final class MeasurementSessionCoordinator: ObservableObject {
         let duration = Date().timeIntervalSince(startTime)
 
         // For timed sessions (snapshot/morning readiness), save the snapshot if we have enough data
-        if mode != .continuous && !collectedRMSSDs.isEmpty {
+        // Skip if session already auto-completed (snapshot was already saved in completeTimedSession)
+        if mode != .continuous && !collectedRMSSDs.isEmpty && !sessionComplete {
             saveSnapshotForSession(mode: mode, startTime: startTime, duration: duration)
         }
 
@@ -374,7 +375,8 @@ final class MeasurementSessionCoordinator: ObservableObject {
             recordMorningReadinessCompletion()
         }
 
-        resetSession()
+        // Don't reset session here - keep showing "Complete!" until user dismisses
+        // This ensures continuous monitoring is properly restarted when user clicks "Done"
     }
 
     private func startContinuousTimer() {

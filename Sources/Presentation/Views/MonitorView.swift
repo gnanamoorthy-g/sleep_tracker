@@ -500,6 +500,7 @@ final class MonitorViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let hrvEngine = HRVEngine()
     private weak var coordinator: AppCoordinator?
+    private var sampleCount: Int = 0
 
     func setup(with coordinator: AppCoordinator) {
         self.coordinator = coordinator
@@ -536,6 +537,28 @@ final class MonitorViewModel: ObservableObject {
                         sdnn: metrics.sdnn,
                         pnn50: metrics.pnn50
                     )
+
+                    // Feed metrics to sleep detection engine for auto sleep tracking
+                    coord.sleepDetectionEngine.updateWithMetrics(
+                        heartRate: Double(packet.heartRate),
+                        rmssd: metrics.rmssd,
+                        timestamp: packet.timestamp
+                    )
+
+                    // If sleep recording is active, add sample to the session
+                    if coord.backgroundSleepManager.isRecording {
+                        let sample = HRVSample(from: packet, rmssd: metrics.rmssd)
+                        coord.backgroundSleepManager.addSample(sample)
+                    }
+
+                    // Periodically update baseline (every 50 samples, ~50 seconds)
+                    sampleCount += 1
+                    if sampleCount % 50 == 0 {
+                        coord.updateBaselineWithNewData(
+                            heartRate: Double(packet.heartRate),
+                            rmssd: metrics.rmssd
+                        )
+                    }
                 }
             }
         }

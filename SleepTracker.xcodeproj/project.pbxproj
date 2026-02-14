@@ -67,6 +67,9 @@
 		A100000100000057 /* SleepSummaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000057 /* SleepSummaryCalculator.swift */; };
 		A100000100000058 /* ContinuousHRVData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000058 /* ContinuousHRVData.swift */; };
 		A100000100000059 /* ContinuousHRVDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000059 /* ContinuousHRVDataRepository.swift */; };
+		A10000010000005A /* DailyHRVComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005A /* DailyHRVComparison.swift */; };
+		A10000010000005B /* DailyHRVDataPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005B /* DailyHRVDataPoint.swift */; };
+		A10000010000005C /* TimeRangePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005C /* TimeRangePicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,6 +135,9 @@
 		A100000200000057 /* SleepSummaryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSummaryCalculator.swift; sourceTree = "<group>"; };
 		A100000200000058 /* ContinuousHRVData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousHRVData.swift; sourceTree = "<group>"; };
 		A100000200000059 /* ContinuousHRVDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousHRVDataRepository.swift; sourceTree = "<group>"; };
+		A10000020000005A /* DailyHRVComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVComparison.swift; sourceTree = "<group>"; };
+		A10000020000005B /* DailyHRVDataPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVDataPoint.swift; sourceTree = "<group>"; };
+		A10000020000005C /* TimeRangePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangePicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,14 +246,24 @@
 		A100000500000008 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				A100000500000061 /* Models */,
 				A100000500000014 /* UseCases */,
 				A100000500000015 /* Sleep */,
 				A100000500000018 /* Scoring */,
 				A100000500000019 /* Intelligence */,
 				A10000050000001D /* Measurement */,
 				A10000050000001E /* Monitoring */,
+				A100000500000060 /* Comparison */,
 			);
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		A100000500000061 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000005B /* DailyHRVDataPoint.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		A10000050000001D /* Measurement */ = {
@@ -309,8 +325,17 @@
 				A10000050000000D /* ViewModels */,
 				A10000050000000E /* Views */,
 				A10000050000001B /* Trends */,
+				A100000500000062 /* Components */,
 			);
 			path = Presentation;
+			sourceTree = "<group>";
+		};
+		A100000500000062 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000005C /* TimeRangePicker.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		A10000050000001F /* Navigation */ = {
@@ -427,6 +452,14 @@
 				A100000200000037 /* TrendsView.swift */,
 			);
 			path = Trends;
+			sourceTree = "<group>";
+		};
+		A100000500000060 /* Comparison */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000005A /* DailyHRVComparison.swift */,
+			);
+			path = Comparison;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -557,6 +590,9 @@
 				A100000100000056 /* MonitorView.swift in Sources */,
 				A100000100000058 /* ContinuousHRVData.swift in Sources */,
 				A100000100000059 /* ContinuousHRVDataRepository.swift in Sources */,
+				A10000010000005A /* DailyHRVComparison.swift in Sources */,
+				A10000010000005B /* DailyHRVDataPoint.swift in Sources */,
+				A10000010000005C /* TimeRangePicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

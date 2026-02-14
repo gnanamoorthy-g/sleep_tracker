@@ -10,6 +10,7 @@ final class BackgroundSleepSessionManager: ObservableObject {
     @Published private(set) var isRecording: Bool = false
     @Published private(set) var currentSession: SleepSessionInProgress?
     @Published private(set) var lastCompletedSession: SleepSession?
+    @Published private(set) var recordingDuration: TimeInterval = 0
 
     // MARK: - Dependencies
     private let sleepDetectionEngine: SleepDetectionEngine
@@ -21,6 +22,7 @@ final class BackgroundSleepSessionManager: ObservableObject {
     private var sessionStartTime: Date?
     private var collectedSamples: [HRVSample] = []
     private var collectedEpochs: [SleepEpoch] = []
+    private var durationTimer: Timer?
 
     // MARK: - Initialization
 
@@ -66,7 +68,7 @@ final class BackgroundSleepSessionManager: ObservableObject {
 
     /// Get formatted duration string
     var formattedDuration: String {
-        guard let duration = currentDuration else { return "0:00:00" }
+        let duration = recordingDuration
         let hours = Int(duration) / 3600
         let minutes = (Int(duration) % 3600) / 60
         let seconds = Int(duration) % 60
@@ -110,6 +112,7 @@ final class BackgroundSleepSessionManager: ObservableObject {
         sessionStartTime = Date()
         collectedSamples.removeAll()
         collectedEpochs.removeAll()
+        recordingDuration = 0
         isRecording = true
 
         currentSession = SleepSessionInProgress(
@@ -117,6 +120,14 @@ final class BackgroundSleepSessionManager: ObservableObject {
             sampleCount: 0,
             epochCount: 0
         )
+
+        // Start timer to update duration display
+        durationTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self = self, let startTime = self.sessionStartTime else { return }
+                self.recordingDuration = Date().timeIntervalSince(startTime)
+            }
+        }
 
         logger.info("Started sleep session recording")
     }
@@ -128,6 +139,10 @@ final class BackgroundSleepSessionManager: ObservableObject {
             return nil
         }
 
+        // Stop the duration timer
+        durationTimer?.invalidate()
+        durationTimer = nil
+
         let endTime = Date()
         isRecording = false
 
@@ -136,22 +151,25 @@ final class BackgroundSleepSessionManager: ObservableObject {
         session.endTime = endTime
         session.samples = collectedSamples
 
-        // Only save if session is long enough (> 1 hour)
+        // Always set lastCompletedSession so UI can show it
+        lastCompletedSession = session
+
+        // Only persist to storage if session is long enough (> 1 hour)
         let duration = endTime.timeIntervalSince(startTime)
         if duration >= 3600 {
             do {
                 try sessionRepository.save(session)
-                lastCompletedSession = session
                 logger.info("Saved sleep session: \(session.id), duration: \(duration / 3600)h")
             } catch {
                 logger.error("Failed to save sleep session: \(error.localizedDescription)")
             }
         } else {
-            logger.info("Discarded short session: \(duration / 60)m")
+            logger.info("Short session not persisted: \(duration / 60)m (need >= 1 hour)")
         }
 
         // Reset state
         sessionStartTime = nil
+        recordingDuration = 0
         collectedSamples.removeAll()
         collectedEpochs.removeAll()
         currentSession = nil

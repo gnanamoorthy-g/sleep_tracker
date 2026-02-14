@@ -20,6 +20,11 @@ struct HomeView: View {
                     // Morning Readiness Status
                     MorningReadinessCard(viewModel: viewModel)
 
+                    // Daily HRV Comparison
+                    if let comparison = viewModel.dailyHRVComparison, comparison.hasData {
+                        DailyHRVComparisonCard(comparison: comparison)
+                    }
+
                     // Last Night's Sleep Summary
                     if let lastSession = viewModel.lastNightsSleep {
                         LastNightSleepCard(session: lastSession, summary: viewModel.lastNightsSummary)
@@ -346,5 +351,118 @@ struct StatItem: View {
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Daily HRV Comparison Card
+
+struct DailyHRVComparisonCard: View {
+    let comparison: DailyHRVComparison
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .foregroundColor(.purple)
+                Text("Today's HRV")
+                    .font(.headline)
+                Spacer()
+                if let baseline = comparison.baseline7d {
+                    Text("Baseline: \(String(format: "%.0f", baseline)) ms")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            HStack(spacing: 12) {
+                // Morning Readiness
+                HRVMeasurementColumn(
+                    title: "Morning",
+                    icon: "sun.horizon.fill",
+                    color: .orange,
+                    summary: comparison.morningReadiness
+                )
+
+                // Continuous
+                HRVMeasurementColumn(
+                    title: "Continuous",
+                    icon: "infinity",
+                    color: .green,
+                    summary: comparison.continuous
+                )
+
+                // Snapshots
+                HRVMeasurementColumn(
+                    title: "Snapshots",
+                    icon: "camera.metering.spot",
+                    color: .blue,
+                    summary: comparison.snapshots
+                )
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+}
+
+struct HRVMeasurementColumn: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let summary: MeasurementSummary?
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.caption)
+
+            if let summary = summary {
+                Text(String(format: "%.0f", summary.rmssd))
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                Text("ms")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                // Baseline comparison
+                if let comparison = summary.comparedToBaseline {
+                    HStack(spacing: 2) {
+                        Image(systemName: comparison >= 100 ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 8))
+                        Text("\(Int(comparison))%")
+                            .font(.caption2)
+                    }
+                    .foregroundColor(comparisonColor(comparison))
+                }
+
+                // Sample count for continuous/snapshots
+                if summary.sampleCount > 1 {
+                    Text("(\(summary.sampleCount) samples)")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("--")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            }
+
+            Text(title)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func comparisonColor(_ value: Double) -> Color {
+        switch value {
+        case 105...: return .green
+        case 95..<105: return .blue
+        case 85..<95: return .orange
+        default: return .red
+        }
     }
 }

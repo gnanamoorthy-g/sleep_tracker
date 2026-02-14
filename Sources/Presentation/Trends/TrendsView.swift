@@ -15,15 +15,18 @@ struct TrendsView: View {
                     // Daily Measurement Comparison (Continuous vs Morning Readiness vs Snapshots)
                     DailyMeasurementComparisonView(viewModel: viewModel)
 
-                    // HRV Trend Chart
+                    // HRV Trend Chart (from all sources)
                     HRVTrendView(
-                        summaries: viewModel.summaries,
+                        dataPoints: viewModel.dailyHRVDataPoints,
                         baseline7d: viewModel.baseline7d,
                         baseline30d: viewModel.baseline30d
                     )
 
-                    // Recovery Trend Chart
-                    RecoveryTrendView(summaries: viewModel.summaries)
+                    // Recovery Trend Chart (from all sources)
+                    RecoveryTrendView(dataPoints: viewModel.dailyHRVDataPoints)
+
+                    // Sleep Trend Chart (sleep sessions only)
+                    SleepTrendView(dataPoints: viewModel.dailyHRVDataPoints.filter { $0.hasSleepData })
 
                     // Latest Sleep Score Breakdown
                     if let latest = viewModel.latestSummary,
@@ -273,7 +276,12 @@ struct DailyMeasurementComparison {
 
 @MainActor
 final class TrendsViewModel: ObservableObject {
+    // Legacy summaries (from sleep sessions only)
     @Published var summaries: [DailyHRVSummary] = []
+
+    // New: Daily HRV data points from all sources
+    @Published var dailyHRVDataPoints: [DailyHRVDataPoint] = []
+
     @Published var latestReport: RecoveryIntelligenceEngine.IntelligenceReport?
     @Published var latestScoreComponents: SleepScore?
     @Published var dailyComparisons: [DailyMeasurementComparison] = []
@@ -281,45 +289,177 @@ final class TrendsViewModel: ObservableObject {
     private let repository = DailyHRVSummaryRepository()
     private let snapshotRepository = HRVSnapshotRepository()
     private let continuousRepository = ContinuousHRVDataRepository()
+    private let sessionRepository = SleepSessionRepository()
 
     var baseline7d: Double? {
-        BaselineEngine.calculate7DayBaseline(from: summaries)
+        guard !dailyHRVDataPoints.isEmpty else { return nil }
+        let last7 = dailyHRVDataPoints.suffix(7)
+        return last7.map { $0.rmssd }.reduce(0, +) / Double(last7.count)
     }
 
     var baseline30d: Double? {
-        BaselineEngine.calculate30DayBaseline(from: summaries)
+        guard !dailyHRVDataPoints.isEmpty else { return nil }
+        let last30 = dailyHRVDataPoints.suffix(30)
+        return last30.map { $0.rmssd }.reduce(0, +) / Double(last30.count)
     }
 
     var latestSummary: DailyHRVSummary? {
         summaries.last
     }
 
+    var latestDataPoint: DailyHRVDataPoint? {
+        dailyHRVDataPoints.last
+    }
+
     func loadData() {
+        // Load legacy summaries (still used for sleep-specific views)
         summaries = repository.loadAll()
 
-        // Calculate intelligence report for latest
-        if let latest = summaries.last {
-            let historical = Array(summaries.dropLast())
-            latestReport = RecoveryIntelligenceEngine.analyze(
-                todaySummary: latest,
-                historicalSummaries: historical
-            )
+        // Load new daily HRV data points from all sources
+        loadDailyHRVDataPoints()
 
-            // Calculate score components
-            if let sleepScore = latest.sleepScore {
-                let totalMinutes = latest.sleepDurationMinutes
-                latestScoreComponents = EnhancedSleepScoreCalculator.calculateDetailedScore(
-                    totalSleepMinutes: totalMinutes,
-                    deepSleepMinutes: latest.deepSleepMinutes,
-                    nightRMSSD: latest.rmssd,
-                    baselineRMSSD: baseline7d ?? latest.rmssd,
-                    awakenings: 0 // Would need to be passed from session
-                )
-            }
+        // Calculate intelligence report from latest data point
+        if let latest = dailyHRVDataPoints.last {
+            let historical = Array(dailyHRVDataPoints.dropLast())
+            latestReport = createIntelligenceReport(from: latest, historical: historical)
+        }
+
+        // Calculate score components from sleep data if available
+        if let latest = summaries.last, latest.sleepScore != nil {
+            latestScoreComponents = EnhancedSleepScoreCalculator.calculateDetailedScore(
+                totalSleepMinutes: latest.sleepDurationMinutes,
+                deepSleepMinutes: latest.deepSleepMinutes,
+                nightRMSSD: latest.rmssd,
+                baselineRMSSD: baseline7d ?? latest.rmssd,
+                awakenings: 0
+            )
         }
 
         // Load daily comparisons
         loadDailyComparisons()
+    }
+
+    private func loadDailyHRVDataPoints() {
+        let calendar = Calendar.current
+        var dataPoints: [DailyHRVDataPoint] = []
+
+        // Load sleep sessions
+        let sleepSessions = (try? sessionRepository.loadAll()) ?? []
+
+        // Get last 365 days (1 year) to support all time range options
+        for dayOffset in (0..<365).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { continue }
+            let startOfDay = calendar.startOfDay(for: date)
+            guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { continue }
+
+            // Get morning readiness for this day
+            let snapshots = snapshotRepository.loadForDate(date)
+            let morningReadiness = snapshots.first { $0.measurementMode == .morningReadiness }
+
+            // Get sleep session that ended on this day (previous night's sleep)
+            let sleepSession = sleepSessions.first { session in
+                guard let endTime = session.endTime else { return false }
+                return endTime >= startOfDay && endTime < endOfDay
+            }
+
+            var dataPoint: DailyHRVDataPoint?
+
+            // Priority 1: Sleep session + optional morning readiness (combined)
+            if let session = sleepSession {
+                let summary = SleepSummaryCalculator.calculate(from: session)
+                dataPoint = DailyHRVDataPoint.fromSleepSession(
+                    session,
+                    summary: summary,
+                    morningReadiness: morningReadiness
+                )
+            }
+            // Priority 2: Morning readiness alone
+            else if let morning = morningReadiness {
+                dataPoint = DailyHRVDataPoint.fromMorningReadiness(morning)
+            }
+            // Priority 3: Continuous monitoring data
+            else {
+                let continuousData = continuousRepository.loadForDate(date)
+                if !continuousData.isEmpty {
+                    dataPoint = DailyHRVDataPoint.fromContinuousData(continuousData)
+                }
+            }
+            // Priority 4: Quick snapshots
+            if dataPoint == nil {
+                let quickSnapshots = snapshots.filter { $0.measurementMode == .snapshot }
+                if !quickSnapshots.isEmpty {
+                    dataPoint = DailyHRVDataPoint.fromSnapshots(quickSnapshots)
+                }
+            }
+
+            if let point = dataPoint {
+                dataPoints.append(point)
+            }
+        }
+
+        // Sort by date and enrich with baselines
+        dataPoints.sort { $0.date < $1.date }
+
+        // Enrich each point with baselines calculated from prior points
+        var enrichedPoints: [DailyHRVDataPoint] = []
+        for (index, point) in dataPoints.enumerated() {
+            let historical = Array(dataPoints.prefix(index))
+            let enriched = point.withBaselines(from: historical)
+            enrichedPoints.append(enriched)
+        }
+
+        dailyHRVDataPoints = enrichedPoints
+    }
+
+    private func createIntelligenceReport(
+        from latest: DailyHRVDataPoint,
+        historical: [DailyHRVDataPoint]
+    ) -> RecoveryIntelligenceEngine.IntelligenceReport? {
+        // Create a temporary DailyHRVSummary for the intelligence engine
+        let tempSummary = DailyHRVSummary(
+            date: latest.date,
+            meanHR: latest.averageHR,
+            minHR: latest.averageHR - 10,
+            maxHR: latest.averageHR + 20,
+            rmssd: latest.rmssd,
+            sdnn: latest.sdnn ?? 0,
+            sleepDurationMinutes: latest.sleepDurationMinutes ?? 0,
+            deepSleepMinutes: latest.deepSleepMinutes ?? 0,
+            lightSleepMinutes: latest.lightSleepMinutes ?? 0,
+            remSleepMinutes: latest.remSleepMinutes ?? 0,
+            awakeMinutes: latest.awakeMinutes ?? 0,
+            baseline7d: latest.baseline7d,
+            baseline30d: latest.baseline30d,
+            zScore: latest.zScore,
+            recoveryScore: latest.recoveryScore,
+            sleepScore: latest.sleepScore
+        )
+
+        let historicalSummaries = historical.map { point in
+            DailyHRVSummary(
+                date: point.date,
+                meanHR: point.averageHR,
+                minHR: point.averageHR - 10,
+                maxHR: point.averageHR + 20,
+                rmssd: point.rmssd,
+                sdnn: point.sdnn ?? 0,
+                sleepDurationMinutes: point.sleepDurationMinutes ?? 0,
+                deepSleepMinutes: point.deepSleepMinutes ?? 0,
+                lightSleepMinutes: point.lightSleepMinutes ?? 0,
+                remSleepMinutes: point.remSleepMinutes ?? 0,
+                awakeMinutes: point.awakeMinutes ?? 0,
+                baseline7d: point.baseline7d,
+                baseline30d: point.baseline30d,
+                zScore: point.zScore,
+                recoveryScore: point.recoveryScore,
+                sleepScore: point.sleepScore
+            )
+        }
+
+        return RecoveryIntelligenceEngine.analyze(
+            todaySummary: tempSummary,
+            historicalSummaries: historicalSummaries
+        )
     }
 
     private func loadDailyComparisons() {
@@ -332,9 +472,9 @@ final class TrendsViewModel: ObservableObject {
 
             // Get continuous data for this day (averaged)
             let continuousData = continuousRepository.loadForDate(date)
-            let continuousRMSSD: Double? = continuousData.isEmpty ? nil :
-                continuousData.map { $0.averageRMSSD * Double($0.sampleCount) }.reduce(0, +) /
-                Double(continuousData.map { $0.sampleCount }.reduce(0, +))
+            let totalSamples = continuousData.map { $0.sampleCount }.reduce(0, +)
+            let continuousRMSSD: Double? = totalSamples == 0 ? nil :
+                continuousData.map { $0.averageRMSSD * Double($0.sampleCount) }.reduce(0, +) / Double(totalSamples)
 
             // Get snapshots for this day
             let snapshots = snapshotRepository.loadForDate(date)

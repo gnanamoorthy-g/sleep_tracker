@@ -23,6 +23,21 @@ final class AppCoordinator: ObservableObject {
     // MARK: - Published State
     @Published var selectedTab: Tab = .home
     @Published var showMorningReadinessPrompt: Bool = false
+    @Published private(set) var baselineSource: BaselineSource = .none
+
+    // MARK: - Baseline Source
+    enum BaselineSource: String {
+        case none = "No baseline"
+        case populationDefault = "Default values"
+        case continuousData = "Today's data"
+        case historicalSleep = "7-day average"
+    }
+
+    // MARK: - Population Defaults (conservative values)
+    private struct PopulationDefaults {
+        static let heartRate: Double = 70  // Average resting HR
+        static let rmssd: Double = 35      // Conservative RMSSD (works for most adults)
+    }
 
     // MARK: - Tab Definition
     enum Tab: Int, CaseIterable {
@@ -145,16 +160,82 @@ final class AppCoordinator: ObservableObject {
     }
 
     private func loadBaselines() {
-        // Load historical data for baselines
+        // Priority 1: Historical sleep data (most accurate, 7-day average)
         let summaries = summaryRepository.loadAll()
-
-        // Calculate and set baseline for sleep detection
         if let baseline7d = BaselineEngine.calculate7DayBaseline(from: summaries) {
             let avgHR = summaries.suffix(7).map { $0.meanHR }.reduce(0, +) / Double(min(7, summaries.count))
-            sleepDetectionEngine.setWakingBaseline(heartRate: avgHR, rmssd: baseline7d)
-            stressMonitor.setBaseline(rmssd: baseline7d, restingHR: avgHR)
-            // Also set baseline for snapshot comparison
-            measurementCoordinator.setBaseline(rmssd: baseline7d)
+            applyBaseline(heartRate: avgHR, rmssd: baseline7d, source: .historicalSleep)
+            return
+        }
+
+        // Priority 2: Today's continuous/snapshot data (personal but limited)
+        if let (hr, rmssd) = calculateBaselineFromTodaysData() {
+            applyBaseline(heartRate: hr, rmssd: rmssd, source: .continuousData)
+            return
+        }
+
+        // Priority 3: Population defaults (fallback for new users)
+        applyBaseline(
+            heartRate: PopulationDefaults.heartRate,
+            rmssd: PopulationDefaults.rmssd,
+            source: .populationDefault
+        )
+        logger.info("Using population default baselines for new user")
+    }
+
+    private func applyBaseline(heartRate: Double, rmssd: Double, source: BaselineSource) {
+        sleepDetectionEngine.setWakingBaseline(heartRate: heartRate, rmssd: rmssd)
+        stressMonitor.setBaseline(rmssd: rmssd, restingHR: heartRate)
+        measurementCoordinator.setBaseline(rmssd: rmssd)
+        baselineSource = source
+        logger.info("Applied baseline: HR=\(heartRate), RMSSD=\(rmssd), source=\(source.rawValue)")
+    }
+
+    private func calculateBaselineFromTodaysData() -> (heartRate: Double, rmssd: Double)? {
+        let today = Date()
+
+        // Collect data from continuous monitoring
+        let continuousData = continuousDataRepository.loadForDate(today)
+        let continuousSamples = continuousData.map { $0.sampleCount }.reduce(0, +)
+
+        // Collect data from snapshots
+        let snapshots = snapshotRepository.loadForDate(today)
+
+        // Need at least 10 samples worth of data
+        let totalSamples = continuousSamples + snapshots.count
+        guard totalSamples >= 10 else { return nil }
+
+        var totalHR: Double = 0
+        var totalRMSSD: Double = 0
+        var weightedCount: Double = 0
+
+        // Add continuous data (weighted by sample count)
+        for data in continuousData {
+            totalHR += data.averageHR * Double(data.sampleCount)
+            totalRMSSD += data.averageRMSSD * Double(data.sampleCount)
+            weightedCount += Double(data.sampleCount)
+        }
+
+        // Add snapshot data (each snapshot = 1 sample)
+        for snapshot in snapshots {
+            totalHR += snapshot.averageHR
+            totalRMSSD += snapshot.rmssd
+            weightedCount += 1
+        }
+
+        guard weightedCount > 0 else { return nil }
+
+        return (totalHR / weightedCount, totalRMSSD / weightedCount)
+    }
+
+    /// Update baselines with new real-time data (call periodically during monitoring)
+    func updateBaselineWithNewData(heartRate: Double, rmssd: Double) {
+        // Only update if we're using continuous data or defaults (not historical)
+        guard baselineSource == .continuousData || baselineSource == .populationDefault else { return }
+
+        // Recalculate from today's data
+        if let (hr, newRmssd) = calculateBaselineFromTodaysData() {
+            applyBaseline(heartRate: hr, rmssd: newRmssd, source: .continuousData)
         }
     }
 }

@@ -14,6 +14,7 @@ final class HomeViewModel: ObservableObject {
     @Published var baseline7d: Double?
     @Published var avgSleepScore: Int?
     @Published var weeklyStressCount: Int = 0
+    @Published var dailyHRVComparison: DailyHRVComparison?
 
     // MARK: - Private Properties
     private var cancellables = Set<AnyCancellable>()
@@ -26,6 +27,7 @@ final class HomeViewModel: ObservableObject {
         loadStressData(from: coordinator)
         loadBaselines(from: coordinator)
         loadRecoveryReport(from: coordinator)
+        loadDailyHRVComparison(from: coordinator)
     }
 
     // MARK: - Private Methods
@@ -92,6 +94,29 @@ final class HomeViewModel: ObservableObject {
         latestReport = RecoveryIntelligenceEngine.analyze(
             todaySummary: latest,
             historicalSummaries: historical
+        )
+    }
+
+    private func loadDailyHRVComparison(from coordinator: AppCoordinator) {
+        let today = Date()
+
+        // Get morning readiness snapshot
+        let morningSnapshot = coordinator.snapshotRepository.loadForDate(today)
+            .first { $0.isMorningReadiness }
+
+        // Get all snapshots for today
+        let allSnapshots = coordinator.snapshotRepository.loadForDate(today)
+
+        // Get continuous monitoring data for today
+        let continuousData = coordinator.continuousDataRepository.loadForDate(today)
+
+        // Create comparison
+        dailyHRVComparison = DailyHRVComparison.create(
+            date: today,
+            morningSnapshot: morningSnapshot,
+            continuousData: continuousData,
+            allSnapshots: allSnapshots,
+            baseline7d: baseline7d
         )
     }
 }
