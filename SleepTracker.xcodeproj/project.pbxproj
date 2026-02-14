@@ -1,0 +1,775 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A100000100000001 /* SleepTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000001 /* SleepTrackerApp.swift */; };
+		A100000100000002 /* BLEConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000002 /* BLEConstants.swift */; };
+		A100000100000003 /* BLEError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000003 /* BLEError.swift */; };
+		A100000100000004 /* BLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000004 /* BLEPeripheral.swift */; };
+		A100000100000005 /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000005 /* BLEManager.swift */; };
+		A100000100000006 /* HeartRatePacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000006 /* HeartRatePacket.swift */; };
+		A100000100000007 /* HeartRateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000007 /* HeartRateParser.swift */; };
+		A100000100000008 /* HRVMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000008 /* HRVMetrics.swift */; };
+		A100000100000009 /* HRVEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000009 /* HRVEngine.swift */; };
+		A10000010000000A /* HRVSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000A /* HRVSample.swift */; };
+		A10000010000000B /* SleepSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000B /* SleepSession.swift */; };
+		A10000010000000C /* SleepSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000C /* SleepSessionRepository.swift */; };
+		A10000010000000D /* LiveMonitoringViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000D /* LiveMonitoringViewModel.swift */; };
+		A10000010000000E /* SessionSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000E /* SessionSummaryViewModel.swift */; };
+		A10000010000000F /* LiveMonitoringView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000F /* LiveMonitoringView.swift */; };
+		A100000100000010 /* SessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000010 /* SessionHistoryView.swift */; };
+		A100000100000011 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000011 /* Logger.swift */; };
+		A100000100000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000200000012 /* Assets.xcassets */; };
+		A100000100000020 /* SleepPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000020 /* SleepPhase.swift */; };
+		A100000100000021 /* SleepEpoch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000021 /* SleepEpoch.swift */; };
+		A100000100000022 /* SleepEpochAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000022 /* SleepEpochAggregator.swift */; };
+		A100000100000023 /* SleepInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000023 /* SleepInferenceEngine.swift */; };
+		A100000100000024 /* SleepScoreCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000024 /* SleepScoreCalculator.swift */; };
+		A100000100000025 /* DeviceSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000025 /* DeviceSelectionView.swift */; };
+		A100000100000026 /* ConnectedDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000026 /* ConnectedDeviceView.swift */; };
+		A100000100000027 /* SleepGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000027 /* SleepGraphView.swift */; };
+		A100000100000030 /* BaselineEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000030 /* BaselineEngine.swift */; };
+		A100000100000031 /* DailyHRVSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000031 /* DailyHRVSummary.swift */; };
+		A100000100000032 /* SleepScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000032 /* SleepScore.swift */; };
+		A100000100000033 /* RecoveryIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000033 /* RecoveryIntelligenceEngine.swift */; };
+		A100000100000034 /* DailyHRVSummaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000034 /* DailyHRVSummaryRepository.swift */; };
+		A100000100000035 /* CloudKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000035 /* CloudKitManager.swift */; };
+		A100000100000036 /* HRVTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000036 /* HRVTrendView.swift */; };
+		A100000100000037 /* TrendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000037 /* TrendsView.swift */; };
+		A100000100000040 /* DevicePersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000040 /* DevicePersistenceManager.swift */; };
+		A100000100000041 /* ReconnectionStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000041 /* ReconnectionStrategy.swift */; };
+		A100000100000042 /* ConnectionHealthMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000042 /* ConnectionHealthMonitor.swift */; };
+		A100000100000043 /* ContinuousDataBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000043 /* ContinuousDataBuffer.swift */; };
+		A100000100000044 /* MeasurementMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000044 /* MeasurementMode.swift */; };
+		A100000100000045 /* MeasurementSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000045 /* MeasurementSessionCoordinator.swift */; };
+		A100000100000046 /* SleepDetectionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000046 /* SleepDetectionEngine.swift */; };
+		A100000100000047 /* BackgroundSleepSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000047 /* BackgroundSleepSessionManager.swift */; };
+		A100000100000048 /* RealTimeStressMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000048 /* RealTimeStressMonitor.swift */; };
+		A100000100000049 /* StressEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000049 /* StressEvent.swift */; };
+		A10000010000004A /* HRVSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004A /* HRVSnapshot.swift */; };
+		A10000010000004B /* PersistedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004B /* PersistedDevice.swift */; };
+		A10000010000004C /* HRVSnapshotRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004C /* HRVSnapshotRepository.swift */; };
+		A10000010000004D /* StressEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004D /* StressEventRepository.swift */; };
+		A10000010000004E /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004E /* NotificationManager.swift */; };
+		A10000010000004F /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000004F /* BackgroundTaskManager.swift */; };
+		A100000100000050 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000050 /* MainTabView.swift */; };
+		A100000100000051 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000051 /* AppCoordinator.swift */; };
+		A100000100000052 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000052 /* HomeView.swift */; };
+		A100000100000053 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000053 /* HomeViewModel.swift */; };
+		A100000100000054 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000054 /* HistoryView.swift */; };
+		A100000100000055 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000055 /* SettingsView.swift */; };
+		A100000100000056 /* MonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000056 /* MonitorView.swift */; };
+		A100000100000057 /* SleepSummaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000057 /* SleepSummaryCalculator.swift */; };
+		A100000100000058 /* ContinuousHRVData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000058 /* ContinuousHRVData.swift */; };
+		A100000100000059 /* ContinuousHRVDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000059 /* ContinuousHRVDataRepository.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A100000200000001 /* SleepTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepTrackerApp.swift; sourceTree = "<group>"; };
+		A100000200000002 /* BLEConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEConstants.swift; sourceTree = "<group>"; };
+		A100000200000003 /* BLEError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEError.swift; sourceTree = "<group>"; };
+		A100000200000004 /* BLEPeripheral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEPeripheral.swift; sourceTree = "<group>"; };
+		A100000200000005 /* BLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
+		A100000200000006 /* HeartRatePacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRatePacket.swift; sourceTree = "<group>"; };
+		A100000200000007 /* HeartRateParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateParser.swift; sourceTree = "<group>"; };
+		A100000200000008 /* HRVMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVMetrics.swift; sourceTree = "<group>"; };
+		A100000200000009 /* HRVEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVEngine.swift; sourceTree = "<group>"; };
+		A10000020000000A /* HRVSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVSample.swift; sourceTree = "<group>"; };
+		A10000020000000B /* SleepSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSession.swift; sourceTree = "<group>"; };
+		A10000020000000C /* SleepSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionRepository.swift; sourceTree = "<group>"; };
+		A10000020000000D /* LiveMonitoringViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMonitoringViewModel.swift; sourceTree = "<group>"; };
+		A10000020000000E /* SessionSummaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSummaryViewModel.swift; sourceTree = "<group>"; };
+		A10000020000000F /* LiveMonitoringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMonitoringView.swift; sourceTree = "<group>"; };
+		A100000200000010 /* SessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryView.swift; sourceTree = "<group>"; };
+		A100000200000011 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		A100000200000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A100000200000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A100000200000020 /* SleepPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepPhase.swift; sourceTree = "<group>"; };
+		A100000200000021 /* SleepEpoch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepEpoch.swift; sourceTree = "<group>"; };
+		A100000200000022 /* SleepEpochAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepEpochAggregator.swift; sourceTree = "<group>"; };
+		A100000200000023 /* SleepInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepInferenceEngine.swift; sourceTree = "<group>"; };
+		A100000200000024 /* SleepScoreCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepScoreCalculator.swift; sourceTree = "<group>"; };
+		A100000200000025 /* DeviceSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSelectionView.swift; sourceTree = "<group>"; };
+		A100000200000026 /* ConnectedDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedDeviceView.swift; sourceTree = "<group>"; };
+		A100000200000027 /* SleepGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepGraphView.swift; sourceTree = "<group>"; };
+		A100000200000030 /* BaselineEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaselineEngine.swift; sourceTree = "<group>"; };
+		A100000200000031 /* DailyHRVSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVSummary.swift; sourceTree = "<group>"; };
+		A100000200000032 /* SleepScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepScore.swift; sourceTree = "<group>"; };
+		A100000200000033 /* RecoveryIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryIntelligenceEngine.swift; sourceTree = "<group>"; };
+		A100000200000034 /* DailyHRVSummaryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVSummaryRepository.swift; sourceTree = "<group>"; };
+		A100000200000035 /* CloudKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitManager.swift; sourceTree = "<group>"; };
+		A100000200000036 /* HRVTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVTrendView.swift; sourceTree = "<group>"; };
+		A100000200000037 /* TrendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsView.swift; sourceTree = "<group>"; };
+		A100000300000000 /* SleepTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A100000200000040 /* DevicePersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePersistenceManager.swift; sourceTree = "<group>"; };
+		A100000200000041 /* ReconnectionStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionStrategy.swift; sourceTree = "<group>"; };
+		A100000200000042 /* ConnectionHealthMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionHealthMonitor.swift; sourceTree = "<group>"; };
+		A100000200000043 /* ContinuousDataBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousDataBuffer.swift; sourceTree = "<group>"; };
+		A100000200000044 /* MeasurementMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementMode.swift; sourceTree = "<group>"; };
+		A100000200000045 /* MeasurementSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementSessionCoordinator.swift; sourceTree = "<group>"; };
+		A100000200000046 /* SleepDetectionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepDetectionEngine.swift; sourceTree = "<group>"; };
+		A100000200000047 /* BackgroundSleepSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSleepSessionManager.swift; sourceTree = "<group>"; };
+		A100000200000048 /* RealTimeStressMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealTimeStressMonitor.swift; sourceTree = "<group>"; };
+		A100000200000049 /* StressEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressEvent.swift; sourceTree = "<group>"; };
+		A10000020000004A /* HRVSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVSnapshot.swift; sourceTree = "<group>"; };
+		A10000020000004B /* PersistedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedDevice.swift; sourceTree = "<group>"; };
+		A10000020000004C /* HRVSnapshotRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRVSnapshotRepository.swift; sourceTree = "<group>"; };
+		A10000020000004D /* StressEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressEventRepository.swift; sourceTree = "<group>"; };
+		A10000020000004E /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		A10000020000004F /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		A100000200000050 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		A100000200000051 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		A100000200000052 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A100000200000053 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		A100000200000054 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		A100000200000055 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A100000200000056 /* MonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorView.swift; sourceTree = "<group>"; };
+		A100000200000057 /* SleepSummaryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSummaryCalculator.swift; sourceTree = "<group>"; };
+		A100000200000058 /* ContinuousHRVData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousHRVData.swift; sourceTree = "<group>"; };
+		A100000200000059 /* ContinuousHRVDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousHRVDataRepository.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A100000400000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A100000500000000 = {
+			isa = PBXGroup;
+			children = (
+				A100000500000001 /* Sources */,
+				A100000200000012 /* Assets.xcassets */,
+				A100000200000013 /* Info.plist */,
+				A100000500000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A100000500000001 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A100000500000003 /* App */,
+				A100000500000004 /* Core */,
+				A100000500000008 /* Domain */,
+				A100000500000009 /* Data */,
+				A10000050000000C /* Presentation */,
+				A10000050000000F /* Infrastructure */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A100000500000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A100000300000000 /* SleepTracker.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A100000500000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000001 /* SleepTrackerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A100000500000004 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				A100000500000005 /* BLE */,
+				A100000500000006 /* Parsing */,
+				A100000500000007 /* HRV */,
+				A100000500000016 /* SleepProcessing */,
+				A100000500000017 /* Analytics */,
+				A10000050000001C /* Storage */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		A10000050000001C /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000043 /* ContinuousDataBuffer.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		A100000500000005 /* BLE */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000002 /* BLEConstants.swift */,
+				A100000200000003 /* BLEError.swift */,
+				A100000200000004 /* BLEPeripheral.swift */,
+				A100000200000005 /* BLEManager.swift */,
+				A100000200000040 /* DevicePersistenceManager.swift */,
+				A100000200000041 /* ReconnectionStrategy.swift */,
+				A100000200000042 /* ConnectionHealthMonitor.swift */,
+			);
+			path = BLE;
+			sourceTree = "<group>";
+		};
+		A100000500000006 /* Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000006 /* HeartRatePacket.swift */,
+				A100000200000007 /* HeartRateParser.swift */,
+			);
+			path = Parsing;
+			sourceTree = "<group>";
+		};
+		A100000500000007 /* HRV */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000008 /* HRVMetrics.swift */,
+				A100000200000009 /* HRVEngine.swift */,
+			);
+			path = HRV;
+			sourceTree = "<group>";
+		};
+		A100000500000008 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				A100000500000014 /* UseCases */,
+				A100000500000015 /* Sleep */,
+				A100000500000018 /* Scoring */,
+				A100000500000019 /* Intelligence */,
+				A10000050000001D /* Measurement */,
+				A10000050000001E /* Monitoring */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		A10000050000001D /* Measurement */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000044 /* MeasurementMode.swift */,
+				A100000200000045 /* MeasurementSessionCoordinator.swift */,
+			);
+			path = Measurement;
+			sourceTree = "<group>";
+		};
+		A10000050000001E /* Monitoring */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000048 /* RealTimeStressMonitor.swift */,
+				A100000200000049 /* StressEvent.swift */,
+			);
+			path = Monitoring;
+			sourceTree = "<group>";
+		};
+		A100000500000009 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				A10000050000000A /* Models */,
+				A10000050000000B /* Repositories */,
+				A10000050000001A /* Cloud */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		A10000050000000A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000000A /* HRVSample.swift */,
+				A10000020000000B /* SleepSession.swift */,
+				A10000020000004A /* HRVSnapshot.swift */,
+				A10000020000004B /* PersistedDevice.swift */,
+				A100000200000058 /* ContinuousHRVData.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A10000050000000B /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000000C /* SleepSessionRepository.swift */,
+				A100000200000034 /* DailyHRVSummaryRepository.swift */,
+				A10000020000004C /* HRVSnapshotRepository.swift */,
+				A10000020000004D /* StressEventRepository.swift */,
+				A100000200000059 /* ContinuousHRVDataRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		A10000050000000C /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				A10000050000001F /* Navigation */,
+				A10000050000000D /* ViewModels */,
+				A10000050000000E /* Views */,
+				A10000050000001B /* Trends */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		A10000050000001F /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000050 /* MainTabView.swift */,
+				A100000200000051 /* AppCoordinator.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		A10000050000000D /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000000D /* LiveMonitoringViewModel.swift */,
+				A10000020000000E /* SessionSummaryViewModel.swift */,
+				A100000200000053 /* HomeViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A10000050000000E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000000F /* LiveMonitoringView.swift */,
+				A100000200000010 /* SessionHistoryView.swift */,
+				A100000200000025 /* DeviceSelectionView.swift */,
+				A100000200000026 /* ConnectedDeviceView.swift */,
+				A100000200000027 /* SleepGraphView.swift */,
+				A100000200000052 /* HomeView.swift */,
+				A100000200000054 /* HistoryView.swift */,
+				A100000200000055 /* SettingsView.swift */,
+				A100000200000056 /* MonitorView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A10000050000000F /* Infrastructure */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000011 /* Logger.swift */,
+				A10000020000004E /* NotificationManager.swift */,
+				A10000020000004F /* BackgroundTaskManager.swift */,
+			);
+			path = Infrastructure;
+			sourceTree = "<group>";
+		};
+		A100000500000014 /* UseCases */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = UseCases;
+			sourceTree = "<group>";
+		};
+		A100000500000015 /* Sleep */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000020 /* SleepPhase.swift */,
+				A100000200000021 /* SleepEpoch.swift */,
+				A100000200000046 /* SleepDetectionEngine.swift */,
+				A100000200000047 /* BackgroundSleepSessionManager.swift */,
+			);
+			path = Sleep;
+			sourceTree = "<group>";
+		};
+		A100000500000016 /* SleepProcessing */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000022 /* SleepEpochAggregator.swift */,
+				A100000200000023 /* SleepInferenceEngine.swift */,
+				A100000200000024 /* SleepScoreCalculator.swift */,
+				A100000200000057 /* SleepSummaryCalculator.swift */,
+			);
+			path = SleepProcessing;
+			sourceTree = "<group>";
+		};
+		A100000500000017 /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000030 /* BaselineEngine.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		A100000500000018 /* Scoring */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000031 /* DailyHRVSummary.swift */,
+				A100000200000032 /* SleepScore.swift */,
+			);
+			path = Scoring;
+			sourceTree = "<group>";
+		};
+		A100000500000019 /* Intelligence */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000033 /* RecoveryIntelligenceEngine.swift */,
+			);
+			path = Intelligence;
+			sourceTree = "<group>";
+		};
+		A10000050000001A /* Cloud */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000035 /* CloudKitManager.swift */,
+			);
+			path = Cloud;
+			sourceTree = "<group>";
+		};
+		A10000050000001B /* Trends */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000036 /* HRVTrendView.swift */,
+				A100000200000037 /* TrendsView.swift */,
+			);
+			path = Trends;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A100000600000000 /* SleepTracker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A100000700000000 /* Build configuration list for PBXNativeTarget "SleepTracker" */;
+			buildPhases = (
+				A100000800000000 /* Sources */,
+				A100000400000000 /* Frameworks */,
+				A100000900000000 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SleepTracker;
+			productName = SleepTracker;
+			productReference = A100000300000000 /* SleepTracker.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A100000A00000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					A100000600000000 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A100000B00000000 /* Build configuration list for PBXProject "SleepTracker" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A100000500000000;
+			productRefGroup = A100000500000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A100000600000000 /* SleepTracker */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A100000900000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000100000012 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A100000800000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000100000001 /* SleepTrackerApp.swift in Sources */,
+				A100000100000002 /* BLEConstants.swift in Sources */,
+				A100000100000003 /* BLEError.swift in Sources */,
+				A100000100000004 /* BLEPeripheral.swift in Sources */,
+				A100000100000005 /* BLEManager.swift in Sources */,
+				A100000100000006 /* HeartRatePacket.swift in Sources */,
+				A100000100000007 /* HeartRateParser.swift in Sources */,
+				A100000100000008 /* HRVMetrics.swift in Sources */,
+				A100000100000009 /* HRVEngine.swift in Sources */,
+				A10000010000000A /* HRVSample.swift in Sources */,
+				A10000010000000B /* SleepSession.swift in Sources */,
+				A10000010000000C /* SleepSessionRepository.swift in Sources */,
+				A10000010000000D /* LiveMonitoringViewModel.swift in Sources */,
+				A10000010000000E /* SessionSummaryViewModel.swift in Sources */,
+				A10000010000000F /* LiveMonitoringView.swift in Sources */,
+				A100000100000010 /* SessionHistoryView.swift in Sources */,
+				A100000100000011 /* Logger.swift in Sources */,
+				A100000100000020 /* SleepPhase.swift in Sources */,
+				A100000100000021 /* SleepEpoch.swift in Sources */,
+				A100000100000022 /* SleepEpochAggregator.swift in Sources */,
+				A100000100000023 /* SleepInferenceEngine.swift in Sources */,
+				A100000100000024 /* SleepScoreCalculator.swift in Sources */,
+				A100000100000057 /* SleepSummaryCalculator.swift in Sources */,
+				A100000100000025 /* DeviceSelectionView.swift in Sources */,
+				A100000100000026 /* ConnectedDeviceView.swift in Sources */,
+				A100000100000027 /* SleepGraphView.swift in Sources */,
+				A100000100000030 /* BaselineEngine.swift in Sources */,
+				A100000100000031 /* DailyHRVSummary.swift in Sources */,
+				A100000100000032 /* SleepScore.swift in Sources */,
+				A100000100000033 /* RecoveryIntelligenceEngine.swift in Sources */,
+				A100000100000034 /* DailyHRVSummaryRepository.swift in Sources */,
+				A100000100000035 /* CloudKitManager.swift in Sources */,
+				A100000100000036 /* HRVTrendView.swift in Sources */,
+				A100000100000037 /* TrendsView.swift in Sources */,
+				A100000100000040 /* DevicePersistenceManager.swift in Sources */,
+				A100000100000041 /* ReconnectionStrategy.swift in Sources */,
+				A100000100000042 /* ConnectionHealthMonitor.swift in Sources */,
+				A100000100000043 /* ContinuousDataBuffer.swift in Sources */,
+				A100000100000044 /* MeasurementMode.swift in Sources */,
+				A100000100000045 /* MeasurementSessionCoordinator.swift in Sources */,
+				A100000100000046 /* SleepDetectionEngine.swift in Sources */,
+				A100000100000047 /* BackgroundSleepSessionManager.swift in Sources */,
+				A100000100000048 /* RealTimeStressMonitor.swift in Sources */,
+				A100000100000049 /* StressEvent.swift in Sources */,
+				A10000010000004A /* HRVSnapshot.swift in Sources */,
+				A10000010000004B /* PersistedDevice.swift in Sources */,
+				A10000010000004C /* HRVSnapshotRepository.swift in Sources */,
+				A10000010000004D /* StressEventRepository.swift in Sources */,
+				A10000010000004E /* NotificationManager.swift in Sources */,
+				A10000010000004F /* BackgroundTaskManager.swift in Sources */,
+				A100000100000050 /* MainTabView.swift in Sources */,
+				A100000100000051 /* AppCoordinator.swift in Sources */,
+				A100000100000052 /* HomeView.swift in Sources */,
+				A100000100000053 /* HomeViewModel.swift in Sources */,
+				A100000100000054 /* HistoryView.swift in Sources */,
+				A100000100000055 /* SettingsView.swift in Sources */,
+				A100000100000056 /* MonitorView.swift in Sources */,
+				A100000100000058 /* ContinuousHRVData.swift in Sources */,
+				A100000100000059 /* ContinuousHRVDataRepository.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A100000C00000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 5DF5S4LF66;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A100000D00000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5DF5S4LF66;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A100000E00000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sleep Tracker";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.hrvmonitor.sleeptracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A100000F00000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sleep Tracker";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.hrvmonitor.sleeptracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A100000700000000 /* Build configuration list for PBXNativeTarget "SleepTracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000E00000000 /* Debug */,
+				A100000F00000000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A100000B00000000 /* Build configuration list for PBXProject "SleepTracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000C00000000 /* Debug */,
+				A100000D00000000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A100000A00000000 /* Project object */;
+}
