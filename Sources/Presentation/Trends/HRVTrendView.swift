@@ -54,6 +54,7 @@ struct HRVTrendView: View {
                 } else {
                     intradayChart
                         .frame(height: 200)
+                        .clipped()
                 }
             } else {
                 if filteredDataPoints.isEmpty {
@@ -61,6 +62,7 @@ struct HRVTrendView: View {
                 } else {
                     trendChart
                         .frame(height: 200)
+                        .clipped()
 
                     legendView
                 }
@@ -315,6 +317,7 @@ struct RecoveryTrendView: View {
             } else {
                 recoveryChart
                     .frame(height: 150)
+                    .clipped()
 
                 recoveryLegend
             }
@@ -539,6 +542,7 @@ struct SleepTrendView: View {
                     }
                 }
                 .frame(height: 180)
+                .clipped()
 
                 if selectedMetric == .duration {
                     durationStats

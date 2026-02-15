@@ -6,47 +6,40 @@ struct DeviceSelectionView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            Group {
                 if bleManager.discoveredPeripherals.isEmpty {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                        Text("Scanning for devices...")
-                            .foregroundColor(.secondary)
+                    VStack(spacing: AppTheme.Spacing.xl) {
+                        ZStack {
+                            Circle().fill(AppTheme.Colors.info.opacity(0.1)).frame(width: 100, height: 100)
+                            Image(systemName: "antenna.radiowaves.left.and.right").font(.system(size: 44)).foregroundStyle(AppTheme.Colors.info.gradient)
+                        }
+                        Text("Scanning for devices...").font(AppTheme.Typography.headline)
+                        LoadingDots()
+                        Text("Make sure your heart rate monitor is powered on and in pairing mode.")
+                            .font(AppTheme.Typography.body).foregroundColor(AppTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
-                    .listRowBackground(Color.clear)
+                    .padding()
                 } else {
-                    ForEach(bleManager.discoveredPeripherals) { peripheral in
+                    List(bleManager.discoveredPeripherals) { peripheral in
                         DeviceRowView(peripheral: peripheral) {
                             bleManager.connect(to: peripheral)
                             dismiss()
                         }
                     }
+                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Select Device")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        bleManager.stopScanning()
-                        dismiss()
-                    }
+                    Button("Cancel") { bleManager.stopScanning(); dismiss() }
                 }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if bleManager.connectionState == .scanning {
-                        ProgressView()
-                    }
+                    if bleManager.connectionState == .scanning { ProgressView() }
                 }
             }
-            .onAppear {
-                if bleManager.connectionState != .scanning {
-                    bleManager.startScanning()
-                }
-            }
+            .onAppear { if bleManager.connectionState != .scanning { bleManager.startScanning() } }
         }
     }
 }
@@ -57,51 +50,32 @@ struct DeviceRowView: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 12) {
-                // Device icon
-                Image(systemName: "heart.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(.red)
+            HStack(spacing: AppTheme.Spacing.md) {
+                ZStack {
+                    Circle().fill(AppTheme.Colors.danger.opacity(0.12)).frame(width: 48, height: 48)
+                    Image(systemName: "heart.circle.fill").font(.system(size: 26)).foregroundStyle(AppTheme.Gradients.health)
+                }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(peripheral.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    Text("UUID: \(peripheral.id.uuidString.prefix(8))...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
+                    Text(peripheral.name).font(AppTheme.Typography.headline).foregroundColor(AppTheme.Colors.textPrimary)
+                    Text("UUID: \(peripheral.id.uuidString.prefix(8))...").font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textTertiary)
                 }
 
                 Spacer()
 
-                // Signal strength
-                VStack(alignment: .trailing, spacing: 4) {
-                    SignalStrengthView(bars: peripheral.signalBars)
-                    Text("\(peripheral.rssi) dBm")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .trailing, spacing: AppTheme.Spacing.xs) {
+                    PremiumSignalStrength(bars: peripheral.signalBars)
+                    Text("\(peripheral.rssi) dBm").font(AppTheme.Typography.caption2).foregroundColor(AppTheme.Colors.textTertiary)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, AppTheme.Spacing.sm)
         }
     }
 }
 
 struct SignalStrengthView: View {
     let bars: Int
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(1...4, id: \.self) { level in
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(level <= bars ? Color.green : Color.gray.opacity(0.3))
-                    .frame(width: 4, height: CGFloat(level * 4 + 4))
-            }
-        }
-    }
+    var body: some View { PremiumSignalStrength(bars: bars) }
 }
 
-#Preview {
-    DeviceSelectionView(bleManager: BLEManager())
-}
+#Preview { DeviceSelectionView(bleManager: BLEManager()) }

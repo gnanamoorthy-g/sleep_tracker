@@ -16,6 +16,14 @@ final class HomeViewModel: ObservableObject {
     @Published var weeklyStressCount: Int = 0
     @Published var dailyHRVComparison: DailyHRVComparison?
 
+    // Intelligence Engine Results
+    @Published var illnessFlag: HealthDetectionEngine.IllnessFlag?
+    @Published var overtrainingFlag: HealthDetectionEngine.OvertrainingFlag?
+    @Published var readinessMetrics: ReadinessEngine.ReadinessMetrics?
+    @Published var biologicalAge: ReadinessEngine.BiologicalAgeResult?
+    @Published var hormonalState: HormonalInferenceEngine.HormonalInference?
+    @Published var performanceReport: PerformanceOptimizationEngine.OptimizationReport?
+
     // MARK: - Private Properties
     private var cancellables = Set<AnyCancellable>()
 
@@ -28,6 +36,7 @@ final class HomeViewModel: ObservableObject {
         loadBaselines(from: coordinator)
         loadRecoveryReport(from: coordinator)
         loadDailyHRVComparison(from: coordinator)
+        loadIntelligenceData(from: coordinator)
     }
 
     // MARK: - Private Methods
@@ -117,6 +126,54 @@ final class HomeViewModel: ObservableObject {
             continuousData: continuousData,
             allSnapshots: allSnapshots,
             baseline7d: baseline7d
+        )
+    }
+
+    private func loadIntelligenceData(from coordinator: AppCoordinator) {
+        let summaries = coordinator.summaryRepository.loadAll()
+        guard let latest = summaries.last else { return }
+        let historical = Array(summaries.dropLast())
+
+        // Illness Detection
+        illnessFlag = HealthDetectionEngine.detectIllness(
+            currentSummary: latest,
+            historicalSummaries: historical
+        )
+
+        // Overtraining Detection
+        overtrainingFlag = HealthDetectionEngine.detectOvertraining(
+            currentSummary: latest,
+            historicalSummaries: historical
+        )
+
+        // Training Readiness
+        readinessMetrics = ReadinessEngine.calculateReadiness(
+            todaySummary: latest,
+            historicalSummaries: historical
+        )
+
+        // Biological Age (requires user's chronological age - default to 30 for now)
+        let avgRMSSD = baseline7d ?? latest.rmssd
+        let avgRHR = historical.suffix(7).map { $0.minHR }.reduce(0, +) / max(1, Double(historical.suffix(7).count))
+        biologicalAge = ReadinessEngine.estimateBiologicalAge(
+            chronologicalAge: 30,  // TODO: Get from user profile
+            avgRMSSD: avgRMSSD,
+            avgRHR: avgRHR > 0 ? avgRHR : latest.minHR
+        )
+
+        // Hormonal/ANS State Inference
+        hormonalState = HormonalInferenceEngine.inferState(
+            currentSummary: latest,
+            historicalSummaries: historical
+        )
+
+        // Performance Recommendations
+        performanceReport = PerformanceOptimizationEngine.generateRecommendations(
+            currentSummary: latest,
+            historicalSummaries: historical,
+            readiness: readinessMetrics,
+            illnessFlag: illnessFlag,
+            overtrainingFlag: overtrainingFlag
         )
     }
 }

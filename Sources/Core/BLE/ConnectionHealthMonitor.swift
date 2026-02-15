@@ -46,12 +46,23 @@ final class ConnectionHealthMonitor: ObservableObject {
         }
     }
 
+    // MARK: - Disconnect Event
+    struct DisconnectEvent: Codable {
+        let timestamp: Date
+        let reason: String
+        let uptimeBeforeDisconnect: TimeInterval
+    }
+
     // MARK: - Private Properties
     private var connectionStartTime: Date?
     private var uptimeTimer: Timer?
     private var rssiHistory: [Int] = []
     private let maxRSSIHistory = 10
     private let logger = Logger(subsystem: "com.sleeptracker", category: "ConnectionHealth")
+
+    // Disconnect event log (for sleep confidence calculation)
+    @Published private(set) var disconnectEvents: [DisconnectEvent] = []
+    private let maxDisconnectEventLog = 50
 
     // MARK: - Public Methods
 
@@ -87,6 +98,33 @@ final class ConnectionHealthMonitor: ObservableObject {
     /// Called when data is received from the device
     func dataReceived() {
         lastDataReceived = Date()
+    }
+
+    /// Log a disconnect event with reason
+    func logDisconnectEvent(reason: String) {
+        let event = DisconnectEvent(
+            timestamp: Date(),
+            reason: reason,
+            uptimeBeforeDisconnect: connectionUptime
+        )
+        disconnectEvents.append(event)
+
+        // Keep only recent events
+        if disconnectEvents.count > maxDisconnectEventLog {
+            disconnectEvents.removeFirst()
+        }
+
+        logger.info("Disconnect logged: \(reason) (uptime was: \(Int(self.connectionUptime))s)")
+    }
+
+    /// Get disconnect events within a time window (for sleep confidence)
+    func disconnectEventsSince(_ date: Date) -> [DisconnectEvent] {
+        disconnectEvents.filter { $0.timestamp >= date }
+    }
+
+    /// Calculate overnight disconnect count
+    func overnightDisconnectCount(sleepStart: Date) -> Int {
+        disconnectEventsSince(sleepStart).count
     }
 
     /// Reset all metrics (e.g., when forgetting device)

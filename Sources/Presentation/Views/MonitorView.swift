@@ -5,13 +5,16 @@ import Combine
 struct MonitorView: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @StateObject private var viewModel = MonitorViewModel()
+    @State private var showContent = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: AppTheme.Spacing.lg) {
                     // Device Connection Section
                     DeviceConnectionSection()
+                        .opacity(showContent ? 1 : 0)
+                        .offset(y: showContent ? 0 : 20)
 
                     // Only show monitoring UI when connected
                     if coordinator.bleManager.connectionState == .connected {
@@ -19,30 +22,47 @@ struct MonitorView: View {
                         MeasurementModeSection(
                             measurementCoordinator: coordinator.measurementCoordinator
                         )
+                        .opacity(showContent ? 1 : 0)
+                        .offset(y: showContent ? 0 : 20)
+                        .animation(AppTheme.Animation.spring.delay(0.1), value: showContent)
 
                         // Live Metrics
                         LiveMetricsSection(viewModel: viewModel)
+                            .opacity(showContent ? 1 : 0)
+                            .offset(y: showContent ? 0 : 20)
+                            .animation(AppTheme.Animation.spring.delay(0.15), value: showContent)
 
                         // Sleep Detection Status
                         SleepDetectionSection(
                             sleepManager: coordinator.backgroundSleepManager,
                             sleepDetectionEngine: coordinator.sleepDetectionEngine
                         )
+                        .opacity(showContent ? 1 : 0)
+                        .offset(y: showContent ? 0 : 20)
+                        .animation(AppTheme.Animation.spring.delay(0.2), value: showContent)
 
                         // Session Recording Status
                         if coordinator.backgroundSleepManager.isRecording {
                             RecordingStatusSection(sleepManager: coordinator.backgroundSleepManager)
+                                .transition(.asymmetric(
+                                    insertion: .scale.combined(with: .opacity),
+                                    removal: .opacity
+                                ))
                         }
                     }
                 }
                 .padding()
             }
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Monitor")
             .sheet(isPresented: $viewModel.showDeviceSelection) {
                 DeviceSelectionView(bleManager: coordinator.bleManager)
             }
             .onAppear {
                 viewModel.setup(with: coordinator)
+                withAnimation(AppTheme.Animation.spring) {
+                    showContent = true
+                }
             }
         }
     }
@@ -53,22 +73,31 @@ struct MonitorView: View {
 struct DeviceConnectionSection: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @State private var showDeviceSelection = false
+    @State private var isPulsing = false
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: statusIcon)
-                    .foregroundColor(statusColor)
-                    .font(.title2)
+        VStack(spacing: AppTheme.Spacing.md) {
+            HStack(spacing: AppTheme.Spacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(statusColor.opacity(0.15))
+                        .frame(width: 52, height: 52)
+                        .scaleEffect(isPulsing && isConnecting ? 1.2 : 1)
+                        .opacity(isPulsing && isConnecting ? 0.5 : 1)
 
-                VStack(alignment: .leading) {
+                    Image(systemName: statusIcon)
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(statusColor.gradient)
+                }
+
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
                     Text(coordinator.bleManager.connectionState.rawValue)
-                        .font(.headline)
+                        .font(AppTheme.Typography.headline)
 
                     if let device = coordinator.bleManager.connectedPeripheral {
                         Text(device.name)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Typography.caption)
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                     }
                 }
 
@@ -82,37 +111,49 @@ struct DeviceConnectionSection: View {
                     }
                 } label: {
                     Text(buttonTitle)
-                        .font(.subheadline)
+                        .font(AppTheme.Typography.subheadline)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(SecondaryButtonStyle(color: coordinator.bleManager.connectionState == .connected ? AppTheme.Colors.danger : AppTheme.Colors.info))
             }
 
-            // Connection health when connected
             if coordinator.bleManager.connectionState == .connected {
-                HStack(spacing: 16) {
-                    Label(
-                        coordinator.bleManager.connectionHealth.signalStrength.rawValue,
-                        systemImage: coordinator.bleManager.connectionHealth.signalStrength.systemImageName
-                    )
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                    if coordinator.bleManager.connectionHealth.isReceivingData {
-                        Label("Receiving Data", systemImage: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.green)
+                HStack(spacing: AppTheme.Spacing.lg) {
+                    HStack(spacing: AppTheme.Spacing.xs) {
+                        PremiumSignalStrength(bars: signalBars)
+                        Text(coordinator.bleManager.connectionHealth.signalStrength.rawValue)
+                            .font(AppTheme.Typography.caption)
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                     }
 
+                    if coordinator.bleManager.connectionHealth.isReceivingData {
+                        HStack(spacing: AppTheme.Spacing.xs) {
+                            Circle()
+                                .fill(AppTheme.Colors.success)
+                                .frame(width: 8, height: 8)
+                            Text("Receiving Data")
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.success)
+                        }
+                    }
                     Spacer()
                 }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .premiumCard()
         .sheet(isPresented: $showDeviceSelection) {
             DeviceSelectionView(bleManager: coordinator.bleManager)
         }
+        .onAppear {
+            if isConnecting {
+                withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
+                    isPulsing = true
+                }
+            }
+        }
+    }
+
+    private var isConnecting: Bool {
+        [.connecting, .reconnecting, .scanning, .scanningForKnownDevice].contains(coordinator.bleManager.connectionState)
     }
 
     private var statusIcon: String {
@@ -126,17 +167,23 @@ struct DeviceConnectionSection: View {
 
     private var statusColor: Color {
         switch coordinator.bleManager.connectionState {
-        case .connected: return .green
-        case .connecting, .reconnecting, .scanning, .scanningForKnownDevice: return .orange
-        case .disconnected: return .red
+        case .connected: return AppTheme.Colors.success
+        case .connecting, .reconnecting, .scanning, .scanningForKnownDevice: return AppTheme.Colors.warning
+        case .disconnected: return AppTheme.Colors.danger
+        }
+    }
+
+    private var signalBars: Int {
+        switch coordinator.bleManager.connectionHealth.signalStrength {
+        case .excellent: return 4
+        case .good: return 3
+        case .fair: return 2
+        case .weak, .unknown: return 1
         }
     }
 
     private var buttonTitle: String {
-        switch coordinator.bleManager.connectionState {
-        case .connected: return "Disconnect"
-        default: return "Connect"
-        }
+        coordinator.bleManager.connectionState == .connected ? "Disconnect" : "Connect"
     }
 }
 
@@ -147,31 +194,23 @@ struct MeasurementModeSection: View {
     @ObservedObject var measurementCoordinator: MeasurementSessionCoordinator
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Measurement Mode")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+            PremiumSectionHeader(title: "Measurement Mode", icon: "waveform.path.ecg", iconColor: AppTheme.Colors.info)
 
-            // Show active timed session (snapshot/morning readiness)
             if measurementCoordinator.isSessionActive && measurementCoordinator.currentMode != .continuous {
                 ActiveSessionCard(measurementCoordinator: measurementCoordinator, coordinator: coordinator)
             } else {
-                // Continuous monitoring status (auto-starts when connected)
                 ContinuousMonitoringStatus(measurementCoordinator: measurementCoordinator)
 
-                // Mode selection buttons for timed measurements
-                Text("Timed Measurements")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                PremiumDivider(label: "Timed Measurements")
 
-                HStack(spacing: 12) {
+                HStack(spacing: AppTheme.Spacing.md) {
                     ModeButton(mode: .snapshot, measurementCoordinator: measurementCoordinator)
                     ModeButton(mode: .morningReadiness, measurementCoordinator: measurementCoordinator)
                 }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .premiumCard()
     }
 }
 
@@ -180,31 +219,18 @@ struct ContinuousMonitoringStatus: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "infinity")
-                .foregroundColor(.green)
-            Text("Continuous Monitoring")
-                .font(.subheadline)
+            ZStack {
+                Circle().fill(AppTheme.Colors.success.opacity(0.12)).frame(width: 36, height: 36)
+                Image(systemName: "infinity").font(.system(size: 16, weight: .semibold)).foregroundStyle(AppTheme.Colors.success.gradient)
+            }
+            Text("Continuous Monitoring").font(AppTheme.Typography.subheadline)
             Spacer()
             if measurementCoordinator.currentMode == .continuous && measurementCoordinator.isSessionActive {
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 8, height: 8)
-                    Text("Active")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.green.opacity(0.2))
-                .cornerRadius(8)
+                PremiumStatusBadge(status: .active, size: .small)
             } else {
-                Text("Waiting...")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text("Waiting...").font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textTertiary)
             }
         }
-        .padding(.vertical, 8)
     }
 }
 
@@ -215,32 +241,23 @@ struct ModeButton: View {
 
     var body: some View {
         Button {
-            // Stop continuous monitoring first, then start timed session
-            if measurementCoordinator.currentMode == .continuous {
-                _ = measurementCoordinator.stopSession()
-            }
-            switch mode {
-            case .snapshot:
-                measurementCoordinator.startSession(mode: .snapshot)
-            case .morningReadiness:
-                measurementCoordinator.startSession(mode: .morningReadiness)
-            case .continuous:
-                measurementCoordinator.startSession(mode: .continuous)
-            }
+            if measurementCoordinator.currentMode == .continuous { _ = measurementCoordinator.stopSession() }
+            measurementCoordinator.startSession(mode: mode)
         } label: {
-            VStack(spacing: 8) {
-                Image(systemName: mode.iconName)
-                    .font(.title2)
-                Text(mode.displayName)
-                    .font(.caption)
+            VStack(spacing: AppTheme.Spacing.sm) {
+                ZStack {
+                    Circle().fill(mode == .morningReadiness ? AppTheme.Gradients.sunrise : AppTheme.Gradients.calm).frame(width: 44, height: 44)
+                    Image(systemName: mode.iconName).font(.system(size: 20, weight: .semibold)).foregroundColor(.white)
+                }
+                Text(mode.displayName).font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textPrimary)
             }
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
-            .cornerRadius(12)
+            .padding(.vertical, AppTheme.Spacing.md)
+            .background(RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium).fill(Color(UIColor.tertiarySystemBackground)))
         }
+        .buttonStyle(ScaleButtonStyle())
         .disabled(mode == .morningReadiness && measurementCoordinator.hasMorningReadinessToday())
+        .opacity(mode == .morningReadiness && measurementCoordinator.hasMorningReadinessToday() ? 0.5 : 1)
     }
 }
 
@@ -249,58 +266,37 @@ struct ActiveSessionCard: View {
     let coordinator: AppCoordinator
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: AppTheme.Spacing.md) {
             HStack {
-                Image(systemName: measurementCoordinator.currentMode?.iconName ?? "waveform.path.ecg")
-                    .foregroundColor(.blue)
-
-                Text(measurementCoordinator.currentMode?.displayName ?? "Active")
-                    .font(.headline)
-
+                ZStack {
+                    Circle().fill(AppTheme.Colors.info.opacity(0.15)).frame(width: 44, height: 44)
+                    Image(systemName: measurementCoordinator.currentMode?.iconName ?? "waveform.path.ecg")
+                        .font(.system(size: 20, weight: .semibold)).foregroundStyle(AppTheme.Colors.info.gradient)
+                }
+                Text(measurementCoordinator.currentMode?.displayName ?? "Active").font(AppTheme.Typography.headline)
                 Spacer()
-
-                // Timer
-                Text(formatTime(measurementCoordinator.elapsedTime))
-                    .font(.title2.monospacedDigit())
-                    .fontWeight(.semibold)
+                PremiumTimerDisplay(elapsed: measurementCoordinator.elapsedTime, total: measurementCoordinator.currentMode?.duration, accentColor: AppTheme.Colors.info)
+                    .frame(width: 80, height: 80)
             }
 
-            // Progress bar for timed sessions
-            if measurementCoordinator.currentMode?.duration != nil {
-                ProgressView(value: measurementCoordinator.progress)
-                    .tint(.blue)
-
-                // Show completion status
-                if measurementCoordinator.sessionComplete {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text("Complete!")
-                            .foregroundColor(.green)
-                    }
-                }
+            if measurementCoordinator.sessionComplete {
+                HStack { Image(systemName: "checkmark.circle.fill").foregroundColor(AppTheme.Colors.success); Text("Complete!").foregroundColor(AppTheme.Colors.success).font(AppTheme.Typography.subheadline) }
             }
 
             Button {
                 _ = measurementCoordinator.stopSession()
-                // Restart continuous monitoring after stopping timed session
                 coordinator.startContinuousMonitoring()
             } label: {
-                Label(measurementCoordinator.sessionComplete ? "Done" : "Stop", systemImage: measurementCoordinator.sessionComplete ? "checkmark" : "stop.fill")
-                    .frame(maxWidth: .infinity)
+                HStack {
+                    Image(systemName: measurementCoordinator.sessionComplete ? "checkmark" : "stop.fill")
+                    Text(measurementCoordinator.sessionComplete ? "Done" : "Stop")
+                }
             }
-            .buttonStyle(.bordered)
-            .tint(measurementCoordinator.sessionComplete ? .green : .red)
+            .buttonStyle(SecondaryButtonStyle(color: measurementCoordinator.sessionComplete ? AppTheme.Colors.success : AppTheme.Colors.danger))
+            .frame(maxWidth: .infinity)
         }
-        .padding()
-        .background(measurementCoordinator.sessionComplete ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
-        .cornerRadius(12)
-    }
-
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%d:%02d", minutes, seconds)
+        .padding(AppTheme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium).fill(measurementCoordinator.sessionComplete ? AppTheme.Colors.success.opacity(0.08) : AppTheme.Colors.info.opacity(0.08)))
     }
 }
 
@@ -310,86 +306,29 @@ struct LiveMetricsSection: View {
     @ObservedObject var viewModel: MonitorViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Live Metrics")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+            PremiumSectionHeader(title: "Live Metrics", icon: "heart.fill", iconColor: AppTheme.Colors.danger)
 
-            HStack(spacing: 16) {
-                MetricCard(
-                    title: "Heart Rate",
-                    value: "\(viewModel.currentHeartRate)",
-                    unit: "BPM",
-                    icon: "heart.fill",
-                    color: .red
-                )
+            HStack(spacing: AppTheme.Spacing.md) {
+                AnimatedHeartRateDisplay(heartRate: viewModel.currentHeartRate, isActive: viewModel.currentHeartRate > 0)
+                    .frame(maxWidth: .infinity)
 
-                MetricCard(
-                    title: "RMSSD",
-                    value: String(format: "%.0f", viewModel.currentRMSSD),
-                    unit: "ms",
-                    icon: "waveform.path.ecg",
-                    color: .blue
-                )
+                VStack(spacing: AppTheme.Spacing.sm) {
+                    PremiumMetricCard(title: "RMSSD", value: String(format: "%.0f", viewModel.currentRMSSD), unit: "ms", icon: "waveform.path.ecg", color: .purple)
+                }
+                .frame(maxWidth: .infinity)
             }
 
             if viewModel.currentSDNN > 0 {
-                HStack(spacing: 16) {
-                    MetricCard(
-                        title: "SDNN",
-                        value: String(format: "%.0f", viewModel.currentSDNN),
-                        unit: "ms",
-                        icon: "chart.line.uptrend.xyaxis",
-                        color: .purple
-                    )
-
+                HStack(spacing: AppTheme.Spacing.md) {
+                    PremiumMetricCard(title: "SDNN", value: String(format: "%.0f", viewModel.currentSDNN), unit: "ms", icon: "chart.line.uptrend.xyaxis", color: AppTheme.Colors.info)
                     if let pnn50 = viewModel.currentPNN50 {
-                        MetricCard(
-                            title: "pNN50",
-                            value: String(format: "%.1f", pnn50),
-                            unit: "%",
-                            icon: "percent",
-                            color: .green
-                        )
+                        PremiumMetricCard(title: "pNN50", value: String(format: "%.1f", pnn50), unit: "%", icon: "percent", color: AppTheme.Colors.success)
                     }
                 }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-    }
-}
-
-struct MetricCard: View {
-    let title: String
-    let value: String
-    let unit: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(value)
-                    .font(.title)
-                    .fontWeight(.bold)
-                Text(unit)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(color.opacity(0.1))
-        .cornerRadius(8)
+        .premiumCard()
     }
 }
 
@@ -401,47 +340,27 @@ struct SleepDetectionSection: View {
     @ObservedObject var sleepDetectionEngine: SleepDetectionEngine
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
             HStack {
-                Text("Sleep Tracking")
-                    .font(.headline)
-                Spacer()
-                Text(sleepDetectionEngine.currentState.emoji)
+                PremiumSectionHeader(title: "Sleep Tracking", icon: "moon.zzz.fill", iconColor: AppTheme.Colors.deepSleep)
+                Text(sleepDetectionEngine.currentState.emoji).font(.title2)
             }
 
             HStack {
-                Text(sleepDetectionEngine.currentState.rawValue)
-                    .font(.subheadline)
-
+                Text(sleepDetectionEngine.currentState.rawValue).font(AppTheme.Typography.subheadline).foregroundColor(AppTheme.Colors.textSecondary)
                 Spacer()
 
-                // Manual sleep toggle
                 if sleepManager.isRecording {
-                    // Show duration and stop button when recording
-                    Text(sleepManager.formattedDuration)
-                        .font(.headline.monospacedDigit())
-
-                    Button {
-                        _ = sleepManager.stopManualRecording()
-                    } label: {
-                        Label("Stop", systemImage: "stop.fill")
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.red)
+                    Text(sleepManager.formattedDuration).font(AppTheme.Typography.headline).monospacedDigit()
+                    Button { _ = sleepManager.stopManualRecording() } label: { Label("Stop", systemImage: "stop.fill") }
+                        .buttonStyle(SecondaryButtonStyle(color: AppTheme.Colors.danger))
                 } else {
-                    // Show start button when not recording
-                    Button {
-                        sleepManager.startManualRecording()
-                    } label: {
-                        Label("Start Sleep", systemImage: "moon.fill")
-                    }
-                    .buttonStyle(.bordered)
+                    Button { sleepManager.startManualRecording() } label: { Label("Start Sleep", systemImage: "moon.fill") }
+                        .buttonStyle(SecondaryButtonStyle(color: AppTheme.Colors.deepSleep))
                 }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .premiumCard()
     }
 }
 
@@ -449,41 +368,26 @@ struct SleepDetectionSection: View {
 
 struct RecordingStatusSection: View {
     @ObservedObject var sleepManager: BackgroundSleepSessionManager
+    @State private var isPulsing = false
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: AppTheme.Spacing.md) {
             HStack {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 12, height: 12)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.red.opacity(0.5), lineWidth: 2)
-                            .scaleEffect(1.5)
-                    )
-
-                Text("Recording Sleep Session")
-                    .font(.headline)
-
+                ZStack {
+                    Circle().fill(AppTheme.Colors.danger.opacity(0.15)).frame(width: 44, height: 44).scaleEffect(isPulsing ? 1.2 : 1).opacity(isPulsing ? 0.5 : 1)
+                    Circle().fill(AppTheme.Colors.danger).frame(width: 12, height: 12)
+                }
+                Text("Recording Sleep Session").font(AppTheme.Typography.headline)
                 Spacer()
-
-                Text(sleepManager.formattedDuration)
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundColor(.secondary)
+                Text(sleepManager.formattedDuration).font(AppTheme.Typography.subheadline).monospacedDigit().foregroundColor(AppTheme.Colors.textSecondary)
             }
 
-            Button {
-                _ = sleepManager.stopManualRecording()
-            } label: {
-                Label("Stop Recording", systemImage: "stop.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .tint(.red)
+            Button { _ = sleepManager.stopManualRecording() } label: { Label("Stop Recording", systemImage: "stop.fill").frame(maxWidth: .infinity) }
+                .buttonStyle(SecondaryButtonStyle(color: AppTheme.Colors.danger))
         }
-        .padding()
-        .background(Color.red.opacity(0.1))
-        .cornerRadius(12)
+        .premiumCard()
+        .overlay(RoundedRectangle(cornerRadius: AppTheme.CornerRadius.large).stroke(AppTheme.Colors.danger.opacity(0.3), lineWidth: 2))
+        .onAppear { withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) { isPulsing = true } }
     }
 }
 
@@ -504,61 +408,29 @@ final class MonitorViewModel: ObservableObject {
 
     func setup(with coordinator: AppCoordinator) {
         self.coordinator = coordinator
-
-        // Subscribe to heart rate data from BLE manager
         coordinator.bleManager.heartRateDataPublisher
             .compactMap { HeartRateParser.parse($0) }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] packet in
-                self?.processPacket(packet)
-            }
+            .sink { [weak self] packet in self?.processPacket(packet) }
             .store(in: &cancellables)
     }
 
     private func processPacket(_ packet: HeartRatePacket) {
-        // Update heart rate
         currentHeartRate = packet.heartRate
-
-        // Compute HRV metrics if we have RR intervals
         if !packet.rrIntervals.isEmpty {
             hrvEngine.addRRIntervals(packet.rrIntervals, timestamp: packet.timestamp)
-
-            // Compute all metrics at once
             if let metrics = hrvEngine.computeMetrics() {
                 currentRMSSD = metrics.rmssd
                 currentSDNN = metrics.sdnn ?? 0
                 currentPNN50 = metrics.pnn50
-
-                // Feed samples to measurement coordinator for snapshot/morning readiness
                 if let coord = coordinator {
-                    coord.measurementCoordinator.addSample(
-                        heartRate: packet.heartRate,
-                        rmssd: metrics.rmssd,
-                        sdnn: metrics.sdnn,
-                        pnn50: metrics.pnn50
-                    )
-
-                    // Feed metrics to sleep detection engine for auto sleep tracking
-                    coord.sleepDetectionEngine.updateWithMetrics(
-                        heartRate: Double(packet.heartRate),
-                        rmssd: metrics.rmssd,
-                        timestamp: packet.timestamp
-                    )
-
-                    // If sleep recording is active, add sample to the session
+                    coord.measurementCoordinator.addSample(heartRate: packet.heartRate, rmssd: metrics.rmssd, sdnn: metrics.sdnn, pnn50: metrics.pnn50)
+                    coord.sleepDetectionEngine.updateWithMetrics(heartRate: Double(packet.heartRate), rmssd: metrics.rmssd, timestamp: packet.timestamp)
                     if coord.backgroundSleepManager.isRecording {
-                        let sample = HRVSample(from: packet, rmssd: metrics.rmssd)
-                        coord.backgroundSleepManager.addSample(sample)
+                        coord.backgroundSleepManager.addSample(HRVSample(from: packet, rmssd: metrics.rmssd))
                     }
-
-                    // Periodically update baseline (every 50 samples, ~50 seconds)
                     sampleCount += 1
-                    if sampleCount % 50 == 0 {
-                        coord.updateBaselineWithNewData(
-                            heartRate: Double(packet.heartRate),
-                            rmssd: metrics.rmssd
-                        )
-                    }
+                    if sampleCount % 50 == 0 { coord.updateBaselineWithNewData(heartRate: Double(packet.heartRate), rmssd: metrics.rmssd) }
                 }
             }
         }

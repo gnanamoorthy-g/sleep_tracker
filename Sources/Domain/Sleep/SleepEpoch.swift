@@ -64,6 +64,11 @@ struct SleepSummary: Codable {
         return (remMinutes / (totalDuration / 60)) * 100
     }
 
+    var lightSleepPercentage: Double {
+        guard totalDuration > 0 else { return 0 }
+        return (lightMinutes / (totalDuration / 60)) * 100
+    }
+
     var sleepEfficiency: Double {
         guard totalDuration > 0 else { return 0 }
         let actualSleep = lightMinutes + deepMinutes + remMinutes

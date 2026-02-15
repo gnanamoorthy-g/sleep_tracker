@@ -43,13 +43,15 @@ final class AppCoordinator: ObservableObject {
     enum Tab: Int, CaseIterable {
         case home = 0
         case monitor = 1
-        case history = 2
-        case settings = 3
+        case insights = 2
+        case history = 3
+        case settings = 4
 
         var title: String {
             switch self {
             case .home: return "Home"
             case .monitor: return "Monitor"
+            case .insights: return "Insights"
             case .history: return "History"
             case .settings: return "Settings"
             }
@@ -59,6 +61,7 @@ final class AppCoordinator: ObservableObject {
             switch self {
             case .home: return "house.fill"
             case .monitor: return "waveform.path.ecg"
+            case .insights: return "chart.bar.xaxis"
             case .history: return "calendar"
             case .settings: return "gearshape.fill"
             }

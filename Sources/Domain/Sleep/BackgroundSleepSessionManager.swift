@@ -97,7 +97,7 @@ final class BackgroundSleepSessionManager: ObservableObject {
             if isRecording && sleepDetectionEngine.shouldStopSleepRecording() {
                 _ = stopRecording()
             }
-        case .maybeAsleep, .waking:
+        case .preSleep, .waking:
             // Transitional states - don't change recording
             break
         }

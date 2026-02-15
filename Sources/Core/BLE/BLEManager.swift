@@ -230,10 +230,16 @@ final class BLEManager: NSObject, ObservableObject {
             self.connectedPeripheral = BLEPeripheral(peripheral: peripheral, rssi: 0)
         }
 
-        peripheral.discoverServices([BLEConstants.heartRateServiceUUID])
+        peripheral.discoverServices([BLEConstants.heartRateServiceUUID, BLEConstants.batteryServiceUUID])
 
         // Start periodic RSSI reading
         startRSSIMonitoring(for: peripheral)
+
+        // Start keep-alive heartbeat for overnight stability
+        startKeepAliveHeartbeat(for: peripheral)
+
+        // Start stale connection detection
+        startStaleConnectionDetection()
     }
 
     private func startRSSIMonitoring(for peripheral: CBPeripheral) {
@@ -246,6 +252,104 @@ final class BLEManager: NSObject, ObservableObject {
             }
             peripheral.readRSSI()
             self.startRSSIMonitoring(for: peripheral)
+        }
+    }
+
+    // MARK: - Keep-Alive Heartbeat (Critical for HW9 overnight stability)
+
+    private var keepAliveTimer: DispatchSourceTimer?
+    private var staleConnectionTimer: DispatchSourceTimer?
+    private var batteryCharacteristic: CBCharacteristic?
+
+    /// Start keep-alive heartbeat to prevent BLE supervision timeout
+    /// Sends a read request every 30 seconds to maintain connection
+    private func startKeepAliveHeartbeat(for peripheral: CBPeripheral) {
+        stopKeepAliveHeartbeat()
+
+        let timer = DispatchSource.makeTimerSource(queue: bleQueue)
+        timer.schedule(deadline: .now() + 30, repeating: 30)
+        timer.setEventHandler { [weak self, weak peripheral] in
+            guard let self = self,
+                  let peripheral = peripheral,
+                  peripheral.state == .connected else {
+                return
+            }
+
+            // Read battery or RSSI as keep-alive signal
+            if let batteryChar = self.batteryCharacteristic {
+                peripheral.readValue(for: batteryChar)
+                self.logger.debug("Keep-alive: reading battery characteristic")
+            } else {
+                peripheral.readRSSI()
+                self.logger.debug("Keep-alive: reading RSSI")
+            }
+        }
+        timer.resume()
+        keepAliveTimer = timer
+
+        logger.info("Keep-alive heartbeat started (30s interval)")
+    }
+
+    private func stopKeepAliveHeartbeat() {
+        keepAliveTimer?.cancel()
+        keepAliveTimer = nil
+    }
+
+    /// Start stale connection detection
+    /// If no data received for 90 seconds, force reconnect
+    private func startStaleConnectionDetection() {
+        stopStaleConnectionDetection()
+
+        let timer = DispatchSource.makeTimerSource(queue: bleQueue)
+        timer.schedule(deadline: .now() + 30, repeating: 30)
+        timer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                guard let lastData = self.connectionHealth.lastDataReceived else {
+                    // No data ever received - might still be initializing
+                    return
+                }
+
+                let secondsSinceLastData = Date().timeIntervalSince(lastData)
+
+                if secondsSinceLastData > 90 {
+                    self.logger.warning("Stale connection detected - no data for \(Int(secondsSinceLastData))s")
+                    self.bleQueue.async {
+                        self.forceReconnect()
+                    }
+                } else if secondsSinceLastData > 60 {
+                    self.logger.warning("Data gap detected: \(Int(secondsSinceLastData))s since last packet")
+                }
+            }
+        }
+        timer.resume()
+        staleConnectionTimer = timer
+
+        logger.info("Stale connection detection started")
+    }
+
+    private func stopStaleConnectionDetection() {
+        staleConnectionTimer?.cancel()
+        staleConnectionTimer = nil
+    }
+
+    /// Force disconnect and immediate reconnect
+    func forceReconnect() {
+        guard let peripheral = heartRatePeripheral else { return }
+
+        logger.info("Force reconnecting...")
+
+        // Log the disconnect event
+        connectionHealth.logDisconnectEvent(reason: "Stale connection - force reconnect")
+
+        centralManager.cancelPeripheralConnection(peripheral)
+
+        // Immediate reconnect (don't use exponential backoff for force reconnect)
+        bleQueue.asyncAfter(deadline: .now() + 1) { [weak self, weak peripheral] in
+            guard let self = self, let peripheral = peripheral else { return }
+            self.updateState(.reconnecting)
+            self.centralManager.connect(peripheral, options: nil)
         }
     }
 }

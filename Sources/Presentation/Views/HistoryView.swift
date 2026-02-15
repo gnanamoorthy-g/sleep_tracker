@@ -9,7 +9,6 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Segment Picker
                 Picker("View", selection: $selectedSegment) {
                     Text("Sleep").tag(0)
                     Text("Snapshots").tag(1)
@@ -18,22 +17,16 @@ struct HistoryView: View {
                 .pickerStyle(.segmented)
                 .padding()
 
-                // Content based on selection
                 switch selectedSegment {
-                case 0:
-                    SleepSessionsListView(viewModel: viewModel)
-                case 1:
-                    SnapshotsListView(viewModel: viewModel)
-                case 2:
-                    TrendsView()
-                default:
-                    EmptyView()
+                case 0: SleepSessionsListView(viewModel: viewModel)
+                case 1: SnapshotsListView(viewModel: viewModel)
+                case 2: TrendsView()
+                default: EmptyView()
                 }
             }
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("History")
-            .onAppear {
-                viewModel.loadData(from: coordinator)
-            }
+            .onAppear { viewModel.loadData(from: coordinator) }
         }
     }
 }
@@ -45,29 +38,16 @@ struct SleepSessionsListView: View {
 
     var body: some View {
         if viewModel.sleepSessions.isEmpty {
-            VStack(spacing: 16) {
-                Image(systemName: "moon.zzz")
-                    .font(.system(size: 50))
-                    .foregroundColor(.secondary)
-                Text("No Sleep Sessions")
-                    .font(.headline)
-                Text("Your recorded sleep sessions will appear here.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
+            PremiumEmptyState(icon: "moon.zzz.fill", title: "No Sleep Sessions", message: "Your recorded sleep sessions will appear here.", iconColor: AppTheme.Colors.deepSleep)
         } else {
             List {
                 ForEach(viewModel.sleepSessions) { session in
-                    NavigationLink {
-                        SessionDetailView(session: session)
-                    } label: {
+                    NavigationLink { SessionDetailView(session: session) } label: {
                         SleepSessionRow(session: session, summary: viewModel.summaryFor(session: session))
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.insetGrouped)
         }
     }
 }
@@ -77,31 +57,29 @@ struct SleepSessionRow: View {
     let summary: SleepSummary?
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(formatDate(session.startTime))
-                    .font(.headline)
+        HStack(spacing: AppTheme.Spacing.md) {
+            ZStack {
+                Circle().fill(AppTheme.Colors.deepSleep.opacity(0.12)).frame(width: 44, height: 44)
+                Image(systemName: "moon.zzz.fill").foregroundStyle(AppTheme.Colors.deepSleep.gradient)
+            }
 
-                Text(formatDuration(session.duration))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
+                Text(formatDate(session.startTime)).font(AppTheme.Typography.headline)
+                Text(formatDuration(session.duration)).font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textSecondary)
             }
 
             Spacer()
 
             if let summary = summary {
-                VStack {
-                    Text("\(summary.sleepScore)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(scoreColor(summary.sleepScore))
-                    Text("Score")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
+                CircularProgressRing(
+                    progress: Double(summary.sleepScore) / 100.0,
+                    gradient: AppTheme.Gradients.scoreGradient(for: summary.sleepScore),
+                    lineWidth: 4, size: 44, showPercentage: false
+                )
+                .overlay(Text("\(summary.sleepScore)").font(AppTheme.Typography.caption).fontWeight(.bold))
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, AppTheme.Spacing.xs)
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -111,18 +89,7 @@ struct SleepSessionRow: View {
     }
 
     private func formatDuration(_ duration: TimeInterval) -> String {
-        let hours = Int(duration) / 3600
-        let minutes = (Int(duration) % 3600) / 60
-        return "\(hours)h \(minutes)m"
-    }
-
-    private func scoreColor(_ score: Int) -> Color {
-        switch score {
-        case 85...: return .green
-        case 70..<85: return .blue
-        case 50..<70: return .orange
-        default: return .red
-        }
+        "\(Int(duration) / 3600)h \((Int(duration) % 3600) / 60)m"
     }
 }
 
@@ -133,25 +100,14 @@ struct SnapshotsListView: View {
 
     var body: some View {
         if viewModel.snapshots.isEmpty {
-            VStack(spacing: 16) {
-                Image(systemName: "camera.metering.spot")
-                    .font(.system(size: 50))
-                    .foregroundColor(.secondary)
-                Text("No Snapshots")
-                    .font(.headline)
-                Text("Your HRV snapshots will appear here.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
+            PremiumEmptyState(icon: "camera.metering.spot", title: "No Snapshots", message: "Your HRV snapshots will appear here.", iconColor: AppTheme.Colors.info)
         } else {
             List {
                 ForEach(viewModel.snapshots) { snapshot in
                     SnapshotRow(snapshot: snapshot)
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.insetGrouped)
         }
     }
 }
@@ -160,42 +116,37 @@ struct SnapshotRow: View {
     let snapshot: HRVSnapshot
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    if snapshot.isMorningReadiness {
-                        Image(systemName: "sun.horizon.fill")
-                            .foregroundColor(.orange)
-                    }
-                    Text(formatDateTime(snapshot.timestamp))
-                        .font(.headline)
-                }
+        HStack(spacing: AppTheme.Spacing.md) {
+            ZStack {
+                Circle().fill(snapshot.isMorningReadiness ? Color.orange.opacity(0.12) : AppTheme.Colors.info.opacity(0.12)).frame(width: 40, height: 40)
+                Image(systemName: snapshot.isMorningReadiness ? "sun.horizon.fill" : "camera.metering.spot")
+                    .foregroundStyle(snapshot.isMorningReadiness ? Color.orange.gradient : AppTheme.Colors.info.gradient)
+            }
 
-                HStack(spacing: 8) {
-                    Text(snapshot.formattedDuration)
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
+                Text(formatDateTime(snapshot.timestamp)).font(AppTheme.Typography.subheadline)
+                HStack(spacing: AppTheme.Spacing.xs) {
+                    Text(snapshot.formattedDuration).font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textTertiary)
                     if let context = snapshot.context {
-                        Text("•")
-                        Text(context.rawValue)
+                        Text(context.rawValue).font(AppTheme.Typography.caption).foregroundColor(AppTheme.Colors.textTertiary)
                     }
                 }
-                .font(.caption)
-                .foregroundColor(.secondary)
             }
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(String(format: "%.0f ms", snapshot.rmssd))
-                    .font(.headline)
-
+            VStack(alignment: .trailing, spacing: AppTheme.Spacing.xxs) {
+                Text(String(format: "%.0f ms", snapshot.rmssd)).font(AppTheme.Typography.headline)
                 if let comparison = snapshot.comparedTo7DayBaseline {
                     Text("\(Int(comparison))%")
-                        .font(.caption)
-                        .foregroundColor(comparison >= 100 ? .green : .orange)
+                        .font(AppTheme.Typography.caption)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Capsule().fill((comparison >= 100 ? AppTheme.Colors.success : AppTheme.Colors.warning).opacity(0.12)))
+                        .foregroundColor(comparison >= 100 ? AppTheme.Colors.success : AppTheme.Colors.warning)
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, AppTheme.Spacing.xs)
     }
 
     private func formatDateTime(_ date: Date) -> String {
@@ -212,25 +163,16 @@ final class HistoryViewModel: ObservableObject {
     @Published var sleepSessions: [SleepSession] = []
     @Published var snapshots: [HRVSnapshot] = []
     @Published var stressEvents: [StressEvent] = []
-
     private var sessionSummaries: [UUID: SleepSummary] = [:]
 
     func loadData(from coordinator: AppCoordinator) {
-        do {
-            sleepSessions = try coordinator.sessionRepository.loadAll()
-        } catch {
-            sleepSessions = []
-        }
+        sleepSessions = (try? coordinator.sessionRepository.loadAll()) ?? []
         snapshots = coordinator.snapshotRepository.loadAll()
         stressEvents = coordinator.stressEventRepository.loadAll()
-
-        // Pre-calculate summaries
         for session in sleepSessions {
             sessionSummaries[session.id] = SleepSummaryCalculator.calculate(from: session)
         }
     }
 
-    func summaryFor(session: SleepSession) -> SleepSummary? {
-        sessionSummaries[session.id]
-    }
+    func summaryFor(session: SleepSession) -> SleepSummary? { sessionSummaries[session.id] }
 }

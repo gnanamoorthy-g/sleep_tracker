@@ -70,6 +70,14 @@
 		A10000010000005A /* DailyHRVComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005A /* DailyHRVComparison.swift */; };
 		A10000010000005B /* DailyHRVDataPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005B /* DailyHRVDataPoint.swift */; };
 		A10000010000005C /* TimeRangePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005C /* TimeRangePicker.swift */; };
+		A10000010000005D /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005D /* DesignSystem.swift */; };
+		A10000010000005E /* PremiumComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005E /* PremiumComponents.swift */; };
+		A10000010000005F /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000005F /* InsightsView.swift */; };
+		A100000100000060 /* MetricDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000060 /* MetricDefinition.swift */; };
+		A100000100000061 /* HealthDetectionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000061 /* HealthDetectionEngine.swift */; };
+		A100000100000062 /* ReadinessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000062 /* ReadinessEngine.swift */; };
+		A100000100000063 /* HormonalInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000063 /* HormonalInferenceEngine.swift */; };
+		A100000100000064 /* PerformanceOptimizationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000064 /* PerformanceOptimizationEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -138,6 +146,14 @@
 		A10000020000005A /* DailyHRVComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVComparison.swift; sourceTree = "<group>"; };
 		A10000020000005B /* DailyHRVDataPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyHRVDataPoint.swift; sourceTree = "<group>"; };
 		A10000020000005C /* TimeRangePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangePicker.swift; sourceTree = "<group>"; };
+		A10000020000005D /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		A10000020000005E /* PremiumComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumComponents.swift; sourceTree = "<group>"; };
+		A10000020000005F /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		A100000200000060 /* MetricDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricDefinition.swift; sourceTree = "<group>"; };
+		A100000200000061 /* HealthDetectionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDetectionEngine.swift; sourceTree = "<group>"; };
+		A100000200000062 /* ReadinessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadinessEngine.swift; sourceTree = "<group>"; };
+		A100000200000063 /* HormonalInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormonalInferenceEngine.swift; sourceTree = "<group>"; };
+		A100000200000064 /* PerformanceOptimizationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceOptimizationEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -326,16 +342,35 @@
 				A10000050000000E /* Views */,
 				A10000050000001B /* Trends */,
 				A100000500000062 /* Components */,
+				A100000500000063 /* DesignSystem */,
+				A100000500000065 /* MetricRegistry */,
 			);
 			path = Presentation;
+			sourceTree = "<group>";
+		};
+		A100000500000065 /* MetricRegistry */ = {
+			isa = PBXGroup;
+			children = (
+				A100000200000060 /* MetricDefinition.swift */,
+			);
+			path = MetricRegistry;
 			sourceTree = "<group>";
 		};
 		A100000500000062 /* Components */ = {
 			isa = PBXGroup;
 			children = (
 				A10000020000005C /* TimeRangePicker.swift */,
+				A10000020000005E /* PremiumComponents.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		A100000500000063 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A10000020000005D /* DesignSystem.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 		A10000050000001F /* Navigation */ = {
@@ -369,6 +404,7 @@
 				A100000200000054 /* HistoryView.swift */,
 				A100000200000055 /* SettingsView.swift */,
 				A100000200000056 /* MonitorView.swift */,
+				A10000020000005F /* InsightsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -433,6 +469,10 @@
 			isa = PBXGroup;
 			children = (
 				A100000200000033 /* RecoveryIntelligenceEngine.swift */,
+				A100000200000061 /* HealthDetectionEngine.swift */,
+				A100000200000062 /* ReadinessEngine.swift */,
+				A100000200000063 /* HormonalInferenceEngine.swift */,
+				A100000200000064 /* PerformanceOptimizationEngine.swift */,
 			);
 			path = Intelligence;
 			sourceTree = "<group>";
@@ -593,6 +633,14 @@
 				A10000010000005A /* DailyHRVComparison.swift in Sources */,
 				A10000010000005B /* DailyHRVDataPoint.swift in Sources */,
 				A10000010000005C /* TimeRangePicker.swift in Sources */,
+				A10000010000005D /* DesignSystem.swift in Sources */,
+				A10000010000005E /* PremiumComponents.swift in Sources */,
+				A10000010000005F /* InsightsView.swift in Sources */,
+				A100000100000060 /* MetricDefinition.swift in Sources */,
+				A100000100000061 /* HealthDetectionEngine.swift in Sources */,
+				A100000100000062 /* ReadinessEngine.swift in Sources */,
+				A100000100000063 /* HormonalInferenceEngine.swift in Sources */,
+				A100000100000064 /* PerformanceOptimizationEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
