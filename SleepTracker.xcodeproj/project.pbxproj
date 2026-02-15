@@ -78,6 +78,12 @@
 		A100000100000062 /* ReadinessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000062 /* ReadinessEngine.swift */; };
 		A100000100000063 /* HormonalInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000063 /* HormonalInferenceEngine.swift */; };
 		A100000100000064 /* PerformanceOptimizationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000200000064 /* PerformanceOptimizationEngine.swift */; };
+		2ECF364A4D9F4513A50F6AB1 /* HRRecoveryMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B9FEC6812243DFB957863C /* HRRecoveryMeasurementView.swift */; };
+		09E5E41E21834E1C9D68E4FD /* ExtendedHRVMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A868FE2379DB42FEA48EF0F2 /* ExtendedHRVMeasurementView.swift */; };
+		69DCB1C4613E4C61AFC33366 /* DFAAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380EB4E28F824902947D3C3E /* DFAAnalyzer.swift */; };
+		4B6CEAD51962410E810E242D /* FrequencyDomainAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8360CA96D042229D5209AD /* FrequencyDomainAnalyzer.swift */; };
+		CC7A3F2F21B943EA9A4FF7F5 /* RRIntervalProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C186A601F74555BEC66E9A /* RRIntervalProcessor.swift */; };
+		73FCF3219D634CD59E31CA58 /* RestingHeartRateCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417B2A3712584CD196BFA2E8 /* RestingHeartRateCalculator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -154,6 +160,12 @@
 		A100000200000062 /* ReadinessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadinessEngine.swift; sourceTree = "<group>"; };
 		A100000200000063 /* HormonalInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormonalInferenceEngine.swift; sourceTree = "<group>"; };
 		A100000200000064 /* PerformanceOptimizationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceOptimizationEngine.swift; sourceTree = "<group>"; };
+		A2B9FEC6812243DFB957863C /* HRRecoveryMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HRRecoveryMeasurementView.swift; sourceTree = "<group>"; };
+		A868FE2379DB42FEA48EF0F2 /* ExtendedHRVMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedHRVMeasurementView.swift; sourceTree = "<group>"; };
+		380EB4E28F824902947D3C3E /* DFAAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DFAAnalyzer.swift; sourceTree = "<group>"; };
+		5F8360CA96D042229D5209AD /* FrequencyDomainAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyDomainAnalyzer.swift; sourceTree = "<group>"; };
+		61C186A601F74555BEC66E9A /* RRIntervalProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRIntervalProcessor.swift; sourceTree = "<group>"; };
+		417B2A3712584CD196BFA2E8 /* RestingHeartRateCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestingHeartRateCalculator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,6 +265,9 @@
 		A100000500000007 /* HRV */ = {
 			isa = PBXGroup;
 			children = (
+				61C186A601F74555BEC66E9A /* RRIntervalProcessor.swift */,
+				5F8360CA96D042229D5209AD /* FrequencyDomainAnalyzer.swift */,
+				380EB4E28F824902947D3C3E /* DFAAnalyzer.swift */,
 				A100000200000008 /* HRVMetrics.swift */,
 				A100000200000009 /* HRVEngine.swift */,
 			);
@@ -405,6 +420,8 @@
 				A100000200000055 /* SettingsView.swift */,
 				A100000200000056 /* MonitorView.swift */,
 				A10000020000005F /* InsightsView.swift */,
+				A2B9FEC6812243DFB957863C /* HRRecoveryMeasurementView.swift */,
+				A868FE2379DB42FEA48EF0F2 /* ExtendedHRVMeasurementView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -440,6 +457,7 @@
 		A100000500000016 /* SleepProcessing */ = {
 			isa = PBXGroup;
 			children = (
+				417B2A3712584CD196BFA2E8 /* RestingHeartRateCalculator.swift */,
 				A100000200000022 /* SleepEpochAggregator.swift */,
 				A100000200000023 /* SleepInferenceEngine.swift */,
 				A100000200000024 /* SleepScoreCalculator.swift */,
@@ -571,6 +589,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73FCF3219D634CD59E31CA58 /* RestingHeartRateCalculator.swift in Sources */,
+				CC7A3F2F21B943EA9A4FF7F5 /* RRIntervalProcessor.swift in Sources */,
+				4B6CEAD51962410E810E242D /* FrequencyDomainAnalyzer.swift in Sources */,
+				69DCB1C4613E4C61AFC33366 /* DFAAnalyzer.swift in Sources */,
 				A100000100000001 /* SleepTrackerApp.swift in Sources */,
 				A100000100000002 /* BLEConstants.swift in Sources */,
 				A100000100000003 /* BLEError.swift in Sources */,
@@ -641,6 +663,8 @@
 				A100000100000062 /* ReadinessEngine.swift in Sources */,
 				A100000100000063 /* HormonalInferenceEngine.swift in Sources */,
 				A100000100000064 /* PerformanceOptimizationEngine.swift in Sources */,
+				2ECF364A4D9F4513A50F6AB1 /* HRRecoveryMeasurementView.swift in Sources */,
+				09E5E41E21834E1C9D68E4FD /* ExtendedHRVMeasurementView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

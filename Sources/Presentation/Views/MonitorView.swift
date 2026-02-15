@@ -267,20 +267,37 @@ struct ActiveSessionCard: View {
 
     var body: some View {
         VStack(spacing: AppTheme.Spacing.md) {
-            HStack {
+            HStack(alignment: .center, spacing: AppTheme.Spacing.md) {
                 ZStack {
                     Circle().fill(AppTheme.Colors.info.opacity(0.15)).frame(width: 44, height: 44)
                     Image(systemName: measurementCoordinator.currentMode?.iconName ?? "waveform.path.ecg")
                         .font(.system(size: 20, weight: .semibold)).foregroundStyle(AppTheme.Colors.info.gradient)
                 }
-                Text(measurementCoordinator.currentMode?.displayName ?? "Active").font(AppTheme.Typography.headline)
-                Spacer()
-                PremiumTimerDisplay(elapsed: measurementCoordinator.elapsedTime, total: measurementCoordinator.currentMode?.duration, accentColor: AppTheme.Colors.info)
-                    .frame(width: 80, height: 80)
-            }
 
-            if measurementCoordinator.sessionComplete {
-                HStack { Image(systemName: "checkmark.circle.fill").foregroundColor(AppTheme.Colors.success); Text("Complete!").foregroundColor(AppTheme.Colors.success).font(AppTheme.Typography.subheadline) }
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
+                    Text(measurementCoordinator.currentMode?.displayName ?? "Active")
+                        .font(AppTheme.Typography.headline)
+                    if measurementCoordinator.sessionComplete {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppTheme.Colors.success)
+                            Text("Complete!")
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.success)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                PremiumTimerDisplay(
+                    elapsed: measurementCoordinator.elapsedTime,
+                    total: measurementCoordinator.currentMode?.duration,
+                    accentColor: AppTheme.Colors.info,
+                    size: 64,
+                    showRemainingLabel: false
+                )
             }
 
             Button {

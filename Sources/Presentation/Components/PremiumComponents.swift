@@ -444,6 +444,22 @@ struct PremiumTimerDisplay: View {
     let elapsed: TimeInterval
     var total: TimeInterval?
     var accentColor: Color = AppTheme.Colors.info
+    var size: CGFloat = 80
+    var showRemainingLabel: Bool = true
+
+    private var lineWidth: CGFloat {
+        size * 0.08 // 8% of size
+    }
+
+    private var fontSize: Font {
+        if size >= 100 {
+            return AppTheme.Typography.metricMedium
+        } else if size >= 70 {
+            return AppTheme.Typography.title3
+        } else {
+            return AppTheme.Typography.headline
+        }
+    }
 
     var progress: Double {
         guard let total = total, total > 0 else { return 0 }
@@ -457,33 +473,34 @@ struct PremiumTimerDisplay: View {
     }
 
     var body: some View {
-        VStack(spacing: AppTheme.Spacing.sm) {
+        VStack(spacing: AppTheme.Spacing.xs) {
             ZStack {
                 // Background ring
                 if total != nil {
                     Circle()
-                        .stroke(accentColor.opacity(0.15), lineWidth: 8)
+                        .stroke(accentColor.opacity(0.15), lineWidth: lineWidth)
 
                     Circle()
                         .trim(from: 0, to: progress)
                         .stroke(
                             accentColor,
-                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                         )
                         .rotationEffect(.degrees(-90))
                 }
 
                 Text(formattedTime)
-                    .font(AppTheme.Typography.metricMedium)
+                    .font(fontSize)
+                    .fontWeight(.semibold)
                     .monospacedDigit()
                     .foregroundColor(AppTheme.Colors.textPrimary)
             }
-            .frame(width: 100, height: 100)
+            .frame(width: size, height: size)
 
-            if let total = total {
-                Text("\(Int((1 - progress) * total / 60)):\(String(format: "%02d", Int((1 - progress) * total) % 60)) remaining")
-                    .font(AppTheme.Typography.caption)
-                    .foregroundColor(AppTheme.Colors.textSecondary)
+            if showRemainingLabel, let total = total {
+                Text("\(Int((1 - progress) * total / 60)):\(String(format: "%02d", Int((1 - progress) * total) % 60)) left")
+                    .font(AppTheme.Typography.caption2)
+                    .foregroundColor(AppTheme.Colors.textTertiary)
             }
         }
     }

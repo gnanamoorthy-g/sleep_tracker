@@ -7,8 +7,23 @@ struct DailyHRVDataPoint: Identifiable {
 
     // MARK: - HRV Metrics
     let rmssd: Double
-    let sdnn: Double?
+    var sdnn: Double?
     let averageHR: Double
+
+    // MARK: - Advanced HRV Metrics
+    var pnn50: Double?
+    var lfHfRatio: Double?
+    var dfaAlpha1: Double?
+
+    // MARK: - Derived Metrics
+    var sympatheticLoad: Double? {
+        // Calculate from LF/HF ratio: map 0-6+ ratio to 0-100 scale
+        guard let ratio = lfHfRatio else { return nil }
+        return min(100, (ratio / 6.0) * 100)
+    }
+
+    // MARK: - HR Recovery (requires separate measurement)
+    var hrRecovery: Double?
 
     // MARK: - Data Sources
     let source: DataSource
@@ -64,7 +79,7 @@ extension DailyHRVDataPoint {
 
     /// Create from morning readiness snapshot only
     static func fromMorningReadiness(_ snapshot: HRVSnapshot) -> DailyHRVDataPoint {
-        DailyHRVDataPoint(
+        var dataPoint = DailyHRVDataPoint(
             date: snapshot.timestamp,
             rmssd: snapshot.rmssd,
             sdnn: snapshot.sdnn,
@@ -73,6 +88,8 @@ extension DailyHRVDataPoint {
             hasMorningReadiness: true,
             hasSleepData: false
         )
+        dataPoint.pnn50 = snapshot.pnn50
+        return dataPoint
     }
 
     /// Create from sleep session with optional morning readiness
@@ -147,8 +164,10 @@ extension DailyHRVDataPoint {
         let avgRMSSD = snapshots.map { $0.rmssd }.reduce(0, +) / Double(snapshots.count)
         let avgHR = snapshots.map { $0.averageHR }.reduce(0, +) / Double(snapshots.count)
         let avgSDNN = snapshots.compactMap { $0.sdnn }.reduce(0, +) / Double(max(1, snapshots.compactMap { $0.sdnn }.count))
+        let pnn50Values = snapshots.compactMap { $0.pnn50 }
+        let avgPNN50 = pnn50Values.isEmpty ? nil : pnn50Values.reduce(0, +) / Double(pnn50Values.count)
 
-        return DailyHRVDataPoint(
+        var dataPoint = DailyHRVDataPoint(
             date: snapshots.first!.timestamp,
             rmssd: avgRMSSD,
             sdnn: avgSDNN,
@@ -157,6 +176,8 @@ extension DailyHRVDataPoint {
             hasMorningReadiness: false,
             hasSleepData: false
         )
+        dataPoint.pnn50 = avgPNN50
+        return dataPoint
     }
 }
 

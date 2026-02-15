@@ -546,72 +546,306 @@ struct MetricCardView: View {
 
 struct MetricDetailView: View {
     let type: MetricType
-    let value: Double
+    let value: Double?
     let baseline: Double?
+    var onActionTapped: ((MetricAction) -> Void)?
+
+    @Environment(\.dismiss) private var dismiss
 
     private var definition: MetricDefinition {
         MetricRegistry.definition(for: type)
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Header
-                HStack {
-                    Image(systemName: definition.icon)
-                        .font(.title)
-                        .foregroundColor(definition.colorLogic(value, baseline).color)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Header
+                    HStack {
+                        Image(systemName: definition.icon)
+                            .font(.title)
+                            .foregroundColor(value != nil ? definition.colorLogic(value!, baseline).color : .gray)
 
-                    VStack(alignment: .leading) {
-                        Text(definition.label)
-                            .font(.title2)
-                            .fontWeight(.bold)
+                        VStack(alignment: .leading) {
+                            Text(definition.label)
+                                .font(.title2)
+                                .fontWeight(.bold)
 
-                        Text(definition.shortDescription)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Divider()
-
-                // Current Value
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Current Value")
-                        .font(.headline)
-
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(String(format: value == value.rounded() ? "%.0f" : "%.1f", value))
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(definition.colorLogic(value, baseline).color)
-
-                        Text(definition.unit)
-                            .font(.title3)
-                            .foregroundColor(.secondary)
+                            Text(definition.shortDescription)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
 
-                    Text(definition.interpretation(value, baseline))
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                    Divider()
+
+                    // Current Value or Action Required
+                    if let value = value {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Current Value")
+                                .font(.headline)
+
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(String(format: value == value.rounded() ? "%.0f" : "%.1f", value))
+                                    .font(.system(size: 48, weight: .bold))
+                                    .foregroundColor(definition.colorLogic(value, baseline).color)
+
+                                Text(definition.unit)
+                                    .font(.title3)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Text(definition.interpretation(value, baseline))
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        // No value - show action required
+                        NoValueActionCard(type: type, onActionTapped: { action in
+                            onActionTapped?(action)
+                            dismiss()
+                        })
+                    }
+
+                    Divider()
+
+                    // Detailed Description
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("About This Metric")
+                            .font(.headline)
+
+                        Text(definition.detailedDescription)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // How to Measure (for all types)
+                    if let howToMeasure = MetricMeasurementInfo.info(for: type) {
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("How to Measure")
+                                .font(.headline)
+
+                            Text(howToMeasure.instructions)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+
+                            if let requirements = howToMeasure.requirements {
+                                Text("Requirements:")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .padding(.top, 4)
+
+                                Text(requirements)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+
+                    Spacer()
                 }
-
-                Divider()
-
-                // Detailed Description
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("About This Metric")
-                        .font(.headline)
-
-                    Text(definition.detailedDescription)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
+                .padding()
             }
-            .padding()
+            .navigationTitle(definition.label)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
-        .navigationTitle(definition.label)
-        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    init(type: MetricType, value: Double?, baseline: Double?, onActionTapped: ((MetricAction) -> Void)? = nil) {
+        self.type = type
+        self.value = value
+        self.baseline = baseline
+        self.onActionTapped = onActionTapped
+    }
+
+    // Legacy init for compatibility
+    init(type: MetricType, value: Double, baseline: Double?) {
+        self.type = type
+        self.value = value
+        self.baseline = baseline
+        self.onActionTapped = nil
+    }
+}
+
+// MARK: - Metric Actions
+
+enum MetricAction {
+    case takeSnapshot
+    case takeExtendedMeasurement
+    case measureHRRecovery
+    case startSleepTracking
+    case takeMorningReadiness
+}
+
+// MARK: - No Value Action Card
+
+struct NoValueActionCard: View {
+    let type: MetricType
+    var onActionTapped: ((MetricAction) -> Void)?
+
+    private var actionInfo: (message: String, buttonLabel: String, action: MetricAction)? {
+        switch type {
+        case .pnn50:
+            return (
+                "pNN50 is calculated during HRV measurements. Take a quick snapshot or morning readiness check to measure this.",
+                "Take HRV Snapshot",
+                .takeSnapshot
+            )
+        case .lfHfRatio, .sympatheticLoad:
+            return (
+                "LF/HF ratio requires frequency domain analysis, which needs at least 3 minutes of continuous heart rate data.",
+                "Take Extended Measurement",
+                .takeExtendedMeasurement
+            )
+        case .dfaAlpha1:
+            return (
+                "DFA Alpha1 requires at least 100 consecutive heartbeats (about 2-3 minutes) for accurate fractal analysis.",
+                "Take Extended Measurement",
+                .takeExtendedMeasurement
+            )
+        case .hrRecovery:
+            return (
+                "Heart Rate Recovery measures how quickly your heart rate drops after exercise. This requires a post-workout measurement.",
+                "Measure HR Recovery",
+                .measureHRRecovery
+            )
+        case .sleepScore:
+            return (
+                "Sleep Score is calculated from overnight sleep tracking data including duration, stages, and HRV patterns.",
+                "Start Sleep Tracking",
+                .startSleepTracking
+            )
+        case .sdnn:
+            return (
+                "SDNN is calculated during HRV measurements. Take a quick snapshot or morning readiness check.",
+                "Take HRV Snapshot",
+                .takeSnapshot
+            )
+        case .readiness:
+            return (
+                "Readiness score combines multiple metrics. Take a morning readiness measurement for best results.",
+                "Take Morning Readiness",
+                .takeMorningReadiness
+            )
+        default:
+            return nil
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .foregroundColor(.orange)
+                Text("No Data Available")
+                    .font(.headline)
+            }
+
+            if let info = actionInfo {
+                Text(info.message)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+
+                Button(action: {
+                    onActionTapped?(info.action)
+                }) {
+                    HStack {
+                        Image(systemName: actionIcon(for: info.action))
+                        Text(info.buttonLabel)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .padding(.top, 8)
+            } else {
+                Text("This metric requires additional data that is not yet available.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+
+    private func actionIcon(for action: MetricAction) -> String {
+        switch action {
+        case .takeSnapshot: return "camera.metering.spot"
+        case .takeExtendedMeasurement: return "waveform.path.ecg"
+        case .measureHRRecovery: return "arrow.down.heart.fill"
+        case .startSleepTracking: return "moon.zzz.fill"
+        case .takeMorningReadiness: return "sun.horizon.fill"
+        }
+    }
+}
+
+// MARK: - Measurement Info
+
+struct MetricMeasurementInfo {
+    let instructions: String
+    let requirements: String?
+
+    static func info(for type: MetricType) -> MetricMeasurementInfo? {
+        switch type {
+        case .rmssd, .sdnn:
+            return MetricMeasurementInfo(
+                instructions: "Measured during any HRV reading - snapshots, morning readiness, or sleep tracking. For best accuracy, stay still and relaxed during measurement.",
+                requirements: "At least 60 seconds of heart rate data"
+            )
+        case .pnn50:
+            return MetricMeasurementInfo(
+                instructions: "Calculated from RR intervals during HRV measurement. Higher values indicate stronger parasympathetic activity.",
+                requirements: "At least 60 seconds of heart rate data"
+            )
+        case .lfHfRatio, .sympatheticLoad:
+            return MetricMeasurementInfo(
+                instructions: "Requires frequency domain analysis using Welch's method. Take an extended measurement while sitting quietly.",
+                requirements: "At least 3 minutes of continuous heart rate data with minimal movement"
+            )
+        case .dfaAlpha1:
+            return MetricMeasurementInfo(
+                instructions: "Uses Detrended Fluctuation Analysis to measure heart rate complexity. Best measured in a rested state.",
+                requirements: "At least 100 consecutive heartbeats (~2-3 minutes)"
+            )
+        case .hrRecovery:
+            return MetricMeasurementInfo(
+                instructions: "Measure your peak heart rate during exercise, then immediately measure your heart rate 1 minute after stopping. The difference is your HR Recovery.",
+                requirements: "Heart rate monitor during and after exercise"
+            )
+        case .sleepScore:
+            return MetricMeasurementInfo(
+                instructions: "Automatically calculated from overnight sleep tracking. Wear your heart rate monitor to bed and start a sleep session.",
+                requirements: "Complete overnight sleep session with heart rate monitoring"
+            )
+        case .readiness:
+            return MetricMeasurementInfo(
+                instructions: "Best measured first thing in the morning. Take a morning readiness measurement within 30 minutes of waking.",
+                requirements: "Morning HRV measurement before caffeine or exercise"
+            )
+        case .biologicalAge:
+            return MetricMeasurementInfo(
+                instructions: "Estimated from your average HRV, resting heart rate, and recovery patterns over time. More data improves accuracy.",
+                requirements: "At least 7 days of HRV measurements"
+            )
+        case .illnessRisk:
+            return MetricMeasurementInfo(
+                instructions: "Automatically detected when HRV drops significantly below baseline while RHR rises. Not a medical diagnosis.",
+                requirements: "Established baseline from 7+ days of measurements"
+            )
+        default:
+            return nil
+        }
     }
 }

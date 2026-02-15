@@ -23,7 +23,9 @@ struct FrequencyDomainAnalyzer {
         let resamplingFrequency: Double = 4.0
 
         /// Window size for Welch's method (samples)
-        let windowSize: Int = 256
+        /// 128 allows analysis with ~43+ bpm over 3 minutes
+        /// Must be power of 2 for FFT
+        let windowSize: Int = 128
 
         /// Overlap ratio for Welch's method (0-1)
         let overlapRatio: Double = 0.5
@@ -240,65 +242,66 @@ struct FrequencyDomainAnalyzer {
 
         guard numSegments > 0 else { return ([], []) }
 
-        // FFT setup
+        // FFT setup - ensure windowSize is power of 2
         let fftSize = windowSize
-        let log2n = vDSP_Length(log2(Double(fftSize)))
+        let log2n = vDSP_Length(log2(Double(fftSize)).rounded())
 
-        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
+        // Validate that fftSize is a power of 2
+        guard fftSize > 0 && (fftSize & (fftSize - 1)) == 0 else {
+            logger.error("FFT size must be power of 2, got \(fftSize)")
             return ([], [])
         }
-        defer { vDSP_destroy_fftsetup(fftSetup) }
+
+        guard let fftSetup = vDSP_create_fftsetupD(log2n, FFTRadix(kFFTRadix2)) else {
+            logger.error("Failed to create FFT setup")
+            return ([], [])
+        }
+        defer { vDSP_destroy_fftsetupD(fftSetup) }
 
         var accumulatedPSD = [Double](repeating: 0, count: fftSize / 2)
 
         for seg in 0..<numSegments {
             let startIdx = seg * hopSize
-            let segment = Array(signal[startIdx..<min(startIdx + windowSize, signal.count)])
+            let endIdx = min(startIdx + windowSize, signal.count)
+            let segment = Array(signal[startIdx..<endIdx])
 
             guard segment.count == windowSize else { continue }
 
             // Apply Hamming window to segment
             let windowedSegment = applyHammingWindow(to: segment)
 
-            // Perform FFT
-            var real = windowedSegment
-            var imaginary = [Double](repeating: 0, count: windowSize)
+            // Allocate split complex buffers
+            var realBuffer = [Double](repeating: 0, count: fftSize)
+            var imagBuffer = [Double](repeating: 0, count: fftSize)
 
-            var splitComplex = DSPDoubleSplitComplex(
-                realp: &real,
-                imagp: &imaginary
-            )
-
-            // Convert to split complex format
-            var combined = [Double](repeating: 0, count: windowSize * 2)
+            // Copy windowed signal to real buffer
             for i in 0..<windowSize {
-                combined[2 * i] = windowedSegment[i]
-                combined[2 * i + 1] = 0
+                realBuffer[i] = windowedSegment[i]
             }
 
-            combined.withUnsafeBufferPointer { ptr in
-                vDSP_ctozD(
-                    UnsafePointer<DSPDoubleComplex>(OpaquePointer(ptr.baseAddress!)),
-                    2,
-                    &splitComplex,
-                    1,
-                    vDSP_Length(windowSize)
-                )
-            }
+            // Perform FFT using withUnsafeMutableBufferPointer for proper memory handling
+            realBuffer.withUnsafeMutableBufferPointer { realPtr in
+                imagBuffer.withUnsafeMutableBufferPointer { imagPtr in
+                    var splitComplex = DSPDoubleSplitComplex(
+                        realp: realPtr.baseAddress!,
+                        imagp: imagPtr.baseAddress!
+                    )
 
-            // Forward FFT
-            vDSP_fft_zipD(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
+                    // Forward FFT (in-place)
+                    vDSP_fft_zipD(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
+                }
+            }
 
             // Calculate magnitude squared (power spectrum)
             for i in 0..<fftSize / 2 {
-                let power = real[i] * real[i] + imaginary[i] * imaginary[i]
+                let power = realBuffer[i] * realBuffer[i] + imagBuffer[i] * imagBuffer[i]
                 accumulatedPSD[i] += power
             }
         }
 
         // Average PSD and normalize
         let scaleFactor = 1.0 / (Double(numSegments) * Double(windowSize) * samplingFrequency)
-        var psd = accumulatedPSD.map { $0 * scaleFactor }
+        let psd = accumulatedPSD.map { $0 * scaleFactor }
 
         // Calculate frequency bins
         var frequencies = [Double]()
