@@ -348,9 +348,13 @@ struct RecoveryTrendView: View {
         Chart {
             ForEach(pointsWithRecovery) { point in
                 if let recoveryScore = point.recoveryScore {
+                    // Cap the displayed value to fit within chart bounds
+                    let cappedScore = min(recoveryScore, 125)
+                    // Use yStart to make bar start from domain minimum (50) instead of 0
                     BarMark(
                         x: .value("Date", point.date, unit: .day),
-                        y: .value("Recovery", recoveryScore)
+                        yStart: .value("Start", 50),
+                        yEnd: .value("Recovery", cappedScore)
                     )
                     .foregroundStyle(colorForRecovery(recoveryScore))
                     .annotation(position: .top) {
@@ -368,11 +372,21 @@ struct RecoveryTrendView: View {
                 .foregroundStyle(.gray.opacity(0.5))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
         }
-        .chartYScale(domain: 50...130)
+        .chartYScale(domain: 50...125)
         .chartXScale(domain: xAxisDomain)
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: selectedRange.desiredAxisMarks)) { _ in
                 AxisValueLabel(format: selectedRange.dateFormat)
+                AxisGridLine()
+            }
+        }
+        .chartYAxis {
+            AxisMarks(values: [50, 75, 100, 125]) { value in
+                AxisValueLabel {
+                    if let v = value.as(Int.self) {
+                        Text("\(v)%")
+                    }
+                }
                 AxisGridLine()
             }
         }
@@ -656,33 +670,65 @@ struct SleepTrendView: View {
     private var stagesChart: some View {
         Chart {
             ForEach(filteredDataPoints) { point in
-                // Deep sleep
+                let deep = point.deepSleepMinutes ?? 0
+                let light = point.lightSleepMinutes ?? 0
+                let rem = point.remSleepMinutes ?? 0
+                let awake = point.awakeMinutes ?? 0
+                let total = deep + light + rem + awake
+
+                // Deep sleep (bottom of stack)
                 BarMark(
                     x: .value("Date", point.date, unit: .day),
-                    y: .value("Minutes", point.deepSleepMinutes ?? 0)
+                    y: .value("Minutes", deep)
                 )
                 .foregroundStyle(by: .value("Stage", "Deep"))
+                .annotation(position: .overlay) {
+                    if deep >= 30 {
+                        Text(formatMinutes(deep))
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                }
 
                 // Light sleep
                 BarMark(
                     x: .value("Date", point.date, unit: .day),
-                    y: .value("Minutes", point.lightSleepMinutes ?? 0)
+                    y: .value("Minutes", light)
                 )
                 .foregroundStyle(by: .value("Stage", "Light"))
+                .annotation(position: .overlay) {
+                    if light >= 30 {
+                        Text(formatMinutes(light))
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                }
 
                 // REM sleep
                 BarMark(
                     x: .value("Date", point.date, unit: .day),
-                    y: .value("Minutes", point.remSleepMinutes ?? 0)
+                    y: .value("Minutes", rem)
                 )
                 .foregroundStyle(by: .value("Stage", "REM"))
+                .annotation(position: .overlay) {
+                    if rem >= 30 {
+                        Text(formatMinutes(rem))
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                }
 
-                // Awake
+                // Awake (top of stack) - add total duration annotation
                 BarMark(
                     x: .value("Date", point.date, unit: .day),
-                    y: .value("Minutes", point.awakeMinutes ?? 0)
+                    y: .value("Minutes", awake)
                 )
                 .foregroundStyle(by: .value("Stage", "Awake"))
+                .annotation(position: .top, alignment: .center) {
+                    Text(formatHoursMinutes(total))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(.primary)
+                }
             }
         }
         .chartForegroundStyleScale([
@@ -698,7 +744,34 @@ struct SleepTrendView: View {
                 AxisGridLine()
             }
         }
+        .chartYAxis {
+            AxisMarks(values: .automatic) { value in
+                AxisValueLabel {
+                    if let mins = value.as(Double.self) {
+                        Text(formatHoursMinutes(mins))
+                    }
+                }
+                AxisGridLine()
+            }
+        }
         .chartLegend(position: .bottom, spacing: 16)
+    }
+
+    private func formatMinutes(_ minutes: Double) -> String {
+        let mins = Int(minutes)
+        if mins >= 60 {
+            return "\(mins / 60)h\(mins % 60)m"
+        }
+        return "\(mins)m"
+    }
+
+    private func formatHoursMinutes(_ minutes: Double) -> String {
+        let hours = Int(minutes) / 60
+        let mins = Int(minutes) % 60
+        if hours > 0 {
+            return "\(hours)h\(mins)m"
+        }
+        return "\(mins)m"
     }
 
     // MARK: - Duration Stats
